@@ -51,7 +51,9 @@ import static com.parse.Parse.getApplicationContext;
 public class FinanceFragment extends Fragment implements SearchView.OnQueryTextListener {
         //exchange https://nomics.com/docs/#tag/Exchange-Rates
         //https://api.nomics.com/v1/exchange-rates?key=c5d0683b83dc6e2dbd00841b72f7c86c
-    private ArrayList<CryptoModel> cryptoModels, searchList,ownCryptos;
+    private final ArrayList<CryptoModel> cryptoModels;
+    private ArrayList<CryptoModel> searchList;
+    private ArrayList<CryptoModel> ownCryptos;
     private RecyclerView recyclerView,ownCryptoPopup;
     private CryptoPostAdapter cryptoPostAdapter ,searchAdapter;
     private ItemClickListener itemClickListener;
@@ -133,7 +135,7 @@ public class FinanceFragment extends Fragment implements SearchView.OnQueryTextL
                         if(s.toString().equals("")){
                             amount.setText("0.0000");
                         }else{
-                           buyedCrptoAmount= String.valueOf((double) (Integer.parseInt(s.toString()) / Double.parseDouble(item.getPrice())));
+                           buyedCrptoAmount= String.valueOf(Integer.parseInt(s.toString()) / Double.parseDouble(item.getPrice()));
                             amount.setText(buyedCrptoAmount);
                             decMoney=s.toString();
                         }
@@ -179,7 +181,7 @@ public class FinanceFragment extends Fragment implements SearchView.OnQueryTextL
                 LayoutInflater inflater = getActivity().getLayoutInflater();
                 View dialogView= inflater.inflate(R.layout.finance_screen_look_own_crypto_popup, null);
                 buyCryptoPopup.setView(dialogView);
-                ownCryptoPopup =(RecyclerView)dialogView.findViewById(R.id.recyclerView_finance_look);
+                ownCryptoPopup = dialogView.findViewById(R.id.recyclerView_finance_look);
                 ownCryptoPopup.setLayoutManager(new LinearLayoutManager(getActivity()));
 
                 cryptoLookPopup=new CryptoLookAdapter(ownCryptos,getActivity(),getContext());
@@ -267,7 +269,7 @@ public class FinanceFragment extends Fragment implements SearchView.OnQueryTextL
                                     @Override
                                     public void done(ParseException e) {
                                         if (e != null) {
-                                            Toast.makeText(getApplicationContext(), e.getLocalizedMessage().toString(), Toast.LENGTH_LONG).show();
+                                            Toast.makeText(getApplicationContext(), e.getLocalizedMessage(), Toast.LENGTH_LONG).show();
                                         } else {
                                             Toast.makeText(getActivity(), "Buyed", Toast.LENGTH_SHORT).show();
                                             History hs = new History(mainUser.getId(),"Crypto Buyed.("+ buyedCrypto.getCurrencyName()+")",getDate() );
@@ -291,7 +293,7 @@ public class FinanceFragment extends Fragment implements SearchView.OnQueryTextL
                                 @Override
                                 public void done(ParseException e) {
                                     if (e != null) {
-                                        Toast.makeText(getApplicationContext(), e.getLocalizedMessage().toString(), Toast.LENGTH_LONG).show();
+                                        Toast.makeText(getApplicationContext(), e.getLocalizedMessage(), Toast.LENGTH_LONG).show();
                                     } else {
                                         Toast.makeText(getApplicationContext(), "Buyed", Toast.LENGTH_LONG).show();
                                         History hs = new History(mainUser.getId(),"Crypto Buyed.(" + buyedCrypto.getCurrencyName()+")",getDate() );
@@ -327,7 +329,7 @@ public class FinanceFragment extends Fragment implements SearchView.OnQueryTextL
                                     @Override
                                     public void done(ParseException e) {
                                         if (e != null) {
-                                            Toast.makeText(getApplicationContext(), e.getLocalizedMessage().toString(), Toast.LENGTH_LONG).show();
+                                            Toast.makeText(getApplicationContext(), e.getLocalizedMessage(), Toast.LENGTH_LONG).show();
                                         } else {
 
                                             mainUser.getBankAccounts().get(index).setCash(Integer.parseInt(currentMoney));
@@ -407,7 +409,7 @@ public class FinanceFragment extends Fragment implements SearchView.OnQueryTextL
             @Override
             public void done(ParseException e) {
                 if(e != null){
-                    Toast.makeText(getApplicationContext(),e.getLocalizedMessage().toString(),Toast.LENGTH_LONG).show();
+                    Toast.makeText(getApplicationContext(), e.getLocalizedMessage(),Toast.LENGTH_LONG).show();
                 }
 
             }

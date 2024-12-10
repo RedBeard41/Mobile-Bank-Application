@@ -4,7 +4,7 @@ import java.util.Random;
 
 public class CreditCard {
     private int limit;
-    private String creditCardNo;
+    private final String creditCardNo;
 
     public CreditCard(int limit) {
         this.limit = limit;
@@ -28,7 +28,7 @@ public class CreditCard {
         Random rnd = new Random();
         for (int i = 0; i <4; i++){
             int random = rnd.nextInt(10);
-            no = no + String.valueOf(random);
+            no = no + random;
         }
 
         return no;

@@ -75,7 +75,7 @@ public class AdminPanelActivity extends AppCompatActivity {
                 LayoutInflater inflater = getLayoutInflater();
                 View dialogView= inflater.inflate(R.layout.history_popup, null);
                 history_popup.setView(dialogView);
-                recyclerViewHistory =(RecyclerView)dialogView.findViewById(R.id.history_recycler_view);
+                recyclerViewHistory = dialogView.findViewById(R.id.history_recycler_view);
                 recyclerViewHistory.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
 
                 historyAdapter=new HistoryAdapter(stackToArrayList(mainUser.getHistory()),AdminPanelActivity.this,getApplicationContext());

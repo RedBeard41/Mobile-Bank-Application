@@ -18,7 +18,7 @@ public class GifImageView extends View {
     private Movie mMovie;
     private int mWidth, mHeight;
     private long mStart;
-    private Context mContext;
+    private final Context mContext;
 
     public GifImageView(Context context) {
         super(context);

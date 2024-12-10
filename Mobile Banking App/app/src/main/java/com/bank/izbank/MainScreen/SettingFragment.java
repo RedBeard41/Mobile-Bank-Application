@@ -86,11 +86,11 @@ public class SettingFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         final View rootView = inflater.inflate(R.layout.activity_profile, container, false);
-        name = (TextView) rootView.findViewById(R.id.settings_userNameTextView);
-        phone=(TextView)rootView.findViewById(R.id.settings_phoneTextView);
-        userId=(TextView)rootView.findViewById(R.id.setting_userId_Big);
-        userAdress=(TextView)rootView.findViewById(R.id.settings_addressTextView);
-        prof=(TextView)rootView.findViewById(R.id.settings_profTextView);
+        name = rootView.findViewById(R.id.settings_userNameTextView);
+        phone= rootView.findViewById(R.id.settings_phoneTextView);
+        userId= rootView.findViewById(R.id.setting_userId_Big);
+        userAdress= rootView.findViewById(R.id.settings_addressTextView);
+        prof= rootView.findViewById(R.id.settings_profTextView);
         imageView=rootView.findViewById(R.id.fragment5_ImageView);
         relativeLayoutMobileRow=rootView.findViewById(R.id.account_mobile_row);
         relativeLayoutNameRow=rootView.findViewById(R.id.account_setting_name_row);
@@ -443,7 +443,7 @@ logOut.setOnClickListener(new View.OnClickListener() {
                                 @Override
                                 public void done(ParseException e) {
                                     if (e != null) {
-                                        Toast.makeText(getContext(), e.getLocalizedMessage().toString(), Toast.LENGTH_SHORT).show();
+                                        Toast.makeText(getContext(), e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
                                     }
                                 }
                             });
@@ -557,7 +557,7 @@ logOut.setOnClickListener(new View.OnClickListener() {
                                             @Override
                                             public void done(ParseException e) {
                                                 if (e != null) {
-                                                    Toast.makeText(getContext(), e.getLocalizedMessage().toString(), Toast.LENGTH_SHORT).show();
+                                                    Toast.makeText(getContext(), e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
                                                 } else {
                                                     Toast.makeText(getContext(), "Uploaded", Toast.LENGTH_SHORT).show();
 

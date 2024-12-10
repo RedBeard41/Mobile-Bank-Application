@@ -68,7 +68,7 @@ public class MyCreditCardAdapter extends RecyclerView.Adapter<MyCreditCardAdapte
         text_view_total_money = context.findViewById(R.id.text_view_total_money);
         final CreditCard CreditCard = MyCreditCards.get(position);
         holder.textCreditCardNo.setText(CreditCard.getCreditCardNo());
-        holder.textCreditCardLimit.setText("$ "+String.valueOf(CreditCard.getLimit()));
+        holder.textCreditCardLimit.setText("$ "+ CreditCard.getLimit());
 
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -95,7 +95,7 @@ public class MyCreditCardAdapter extends RecyclerView.Adapter<MyCreditCardAdapte
                     ad.setView(editText);
                     String[] items = new String[MyBankAccounts.size()];
                     for (int i =0; i<MyBankAccounts.size();i++){
-                        String data= MyBankAccounts.get(i).getAccountno() + "  $" + Integer.toString(MyBankAccounts.get(i).getCash());
+                        String data= MyBankAccounts.get(i).getAccountno() + "  $" + MyBankAccounts.get(i).getCash();
                         items[i] = data;
                     }
                     final int[] checkedItem = {0};
@@ -183,7 +183,7 @@ public class MyCreditCardAdapter extends RecyclerView.Adapter<MyCreditCardAdapte
             @Override
             public void done(ParseException e) {
                 if(e != null){
-                    Toast.makeText(getApplicationContext(),e.getLocalizedMessage().toString(),Toast.LENGTH_LONG).show();
+                    Toast.makeText(getApplicationContext(), e.getLocalizedMessage(),Toast.LENGTH_LONG).show();
                 }
                 else{
                     Toast.makeText(getApplicationContext(),"banka datada",Toast.LENGTH_LONG).show();
@@ -205,7 +205,7 @@ public class MyCreditCardAdapter extends RecyclerView.Adapter<MyCreditCardAdapte
             @Override
             public void done(ParseException e) {
                 if(e != null){
-                    Toast.makeText(getApplicationContext(),e.getLocalizedMessage().toString(),Toast.LENGTH_LONG).show();
+                    Toast.makeText(getApplicationContext(), e.getLocalizedMessage(),Toast.LENGTH_LONG).show();
                 }
                 else{
                     Toast.makeText(getApplicationContext(),"kart datada",Toast.LENGTH_LONG).show();
@@ -284,7 +284,7 @@ public class MyCreditCardAdapter extends RecyclerView.Adapter<MyCreditCardAdapte
         ImageView imageCreditCard;
         TextView textCreditCardLimit;
         TextView textCreditCardNo;
-        private CardView cardView;
+        private final CardView cardView;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -307,7 +307,7 @@ public class MyCreditCardAdapter extends RecyclerView.Adapter<MyCreditCardAdapte
             @Override
             public void done(ParseException e) {
                 if(e != null){
-                    Toast.makeText(getApplicationContext(),e.getLocalizedMessage().toString(),Toast.LENGTH_LONG).show();
+                    Toast.makeText(getApplicationContext(), e.getLocalizedMessage(),Toast.LENGTH_LONG).show();
                 }
                 else{
                     Toast.makeText(getApplicationContext(),"history datada",Toast.LENGTH_LONG).show();

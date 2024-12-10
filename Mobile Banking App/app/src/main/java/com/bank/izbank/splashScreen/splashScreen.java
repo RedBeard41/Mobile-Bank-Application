@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
@@ -49,7 +50,7 @@ public class splashScreen extends AppCompatActivity {
 
         gifImageView = findViewById(R.id.GifImageView);
         progressBar = findViewById(R.id.progress_barr);
-        progressBar.setVisibility(progressBar.VISIBLE);
+        progressBar.setVisibility(View.VISIBLE);
         userContext=new UserContext();
         normalUser=new User();
         adminUser=new Admin();

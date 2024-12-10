@@ -32,8 +32,8 @@ import static com.parse.Parse.getApplicationContext;
 
 public class CreditAdapter extends RecyclerView.Adapter<CreditAdapter.CardViewObjectHolder> {
 
-    private Context mContext;
-    private List<Credit> list;
+    private final Context mContext;
+    private final List<Credit> list;
     private CustomEventListener listener;
 
     public void setListener(CustomEventListener listener){
@@ -87,7 +87,7 @@ public class CreditAdapter extends RecyclerView.Adapter<CreditAdapter.CardViewOb
 
         Credit credit = list.get(position);
 
-        holder.textViewInstallment.setText(String.valueOf(credit.getInstallment())+" months");
+        holder.textViewInstallment.setText(credit.getInstallment() +" months");
         holder.textViewInterestRate.setText("%"+credit.getInterestRate());
         holder.textViewAmount.setText(credit.getPayAmount()+" TL");
         holder.cardViewCredit.setOnClickListener(new View.OnClickListener() {

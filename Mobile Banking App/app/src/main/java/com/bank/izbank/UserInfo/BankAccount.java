@@ -5,7 +5,7 @@ import java.util.Random;
 public class BankAccount {
 
     private int cash;
-    private  String accountno;
+    private final String accountno;
 
 
     public BankAccount(int cash) {
@@ -22,7 +22,7 @@ public class BankAccount {
         Random rnd = new Random();
         for (int i = 0; i < 10; i++) {
             int radnomint = rnd.nextInt(10);
-            no = no + String.valueOf(radnomint);
+            no = no + radnomint;
         }
 
         return no;

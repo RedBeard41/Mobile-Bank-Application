@@ -127,7 +127,7 @@ public class AccountFragment extends Fragment {
             @Override
             public void done(ParseException e) {
                 if(e != null){
-                    Toast.makeText(getApplicationContext(),e.getLocalizedMessage().toString(),Toast.LENGTH_LONG).show();
+                    Toast.makeText(getApplicationContext(), e.getLocalizedMessage(),Toast.LENGTH_LONG).show();
                 }
                 else{
 
@@ -149,7 +149,7 @@ public class AccountFragment extends Fragment {
             @Override
             public void done(ParseException e) {
                 if(e != null){
-                    Toast.makeText(getApplicationContext(),e.getLocalizedMessage().toString(),Toast.LENGTH_LONG).show();
+                    Toast.makeText(getApplicationContext(), e.getLocalizedMessage(),Toast.LENGTH_LONG).show();
                 }
                 else{
 
@@ -170,7 +170,7 @@ public class AccountFragment extends Fragment {
             @Override
             public void done(ParseException e) {
                 if(e != null){
-                    Toast.makeText(getApplicationContext(),e.getLocalizedMessage().toString(),Toast.LENGTH_LONG).show();
+                    Toast.makeText(getApplicationContext(), e.getLocalizedMessage(),Toast.LENGTH_LONG).show();
                 }
                 else{
 
@@ -234,7 +234,7 @@ public class AccountFragment extends Fragment {
             @Override
             public void done(ParseException e) {
                 if(e != null){
-                    Toast.makeText(getApplicationContext(),e.getLocalizedMessage().toString(),Toast.LENGTH_LONG).show();
+                    Toast.makeText(getApplicationContext(), e.getLocalizedMessage(),Toast.LENGTH_LONG).show();
                 }
                 else{
 
@@ -257,7 +257,7 @@ public class AccountFragment extends Fragment {
                 LayoutInflater inflater = getActivity().getLayoutInflater();
                 View dialogView= inflater.inflate(R.layout.history_popup, null);
                 history_popup.setView(dialogView);
-                recyclerViewHistory =(RecyclerView)dialogView.findViewById(R.id.history_recycler_view);
+                recyclerViewHistory = dialogView.findViewById(R.id.history_recycler_view);
                 recyclerViewHistory.setLayoutManager(new LinearLayoutManager(getActivity()));
 
                 historyAdapter=new HistoryAdapter(stackToArrayList(mainUser.getHistory()),getActivity(),getContext());
@@ -387,7 +387,7 @@ public class AccountFragment extends Fragment {
                     ad.setView(editText);
                     String[] items = new String[myBankAccount.size()];
                     for (int i =0; i<myBankAccount.size();i++){
-                        String data= myBankAccount.get(i).getAccountno() + "  $" + Integer.toString(myBankAccount.get(i).getCash());
+                        String data= myBankAccount.get(i).getAccountno() + "  $" + myBankAccount.get(i).getCash();
                         items[i] = data;
                     }
                     final int[] checkedItem = {0};
@@ -428,7 +428,7 @@ public class AccountFragment extends Fragment {
                 AlertDialog.Builder ad = new AlertDialog.Builder(getContext());
                 ad.setTitle("What Do You Want to Do?");
                 ad.setIcon(R.drawable.icon_save_money);
-                String arr[] = {("SEND MONEY TO ONE OF YOUR ACCOUNTS") , "SEND ANOTHER PERSON"};
+                String[] arr = {("SEND MONEY TO ONE OF YOUR ACCOUNTS") , "SEND ANOTHER PERSON"};
                 ad.setItems(arr, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
                         switch (which) {
@@ -440,7 +440,7 @@ public class AccountFragment extends Fragment {
 
                                 String[] items = new String[myBankAccount.size()];
                                 for (int i =0; i<myBankAccount.size();i++){
-                                    String data= myBankAccount.get(i).getAccountno() + "  $" + Integer.toString(myBankAccount.get(i).getCash());
+                                    String data= myBankAccount.get(i).getAccountno() + "  $" + myBankAccount.get(i).getCash();
                                     items[i] = data;
                                 }
                                 final int[] from = {0};
@@ -460,7 +460,7 @@ public class AccountFragment extends Fragment {
 
                                         String[] items = new String[myBankAccount.size()];
                                         for (int i =0; i<myBankAccount.size();i++){
-                                            String data= myBankAccount.get(i).getAccountno() + "  $" + Integer.toString(myBankAccount.get(i).getCash());
+                                            String data= myBankAccount.get(i).getAccountno() + "  $" + myBankAccount.get(i).getCash();
                                             items[i] = data;
                                         }
                                         final int[] to = {0};
@@ -572,7 +572,7 @@ public class AccountFragment extends Fragment {
 
                                         String[] items = new String[myBankAccount.size()];
                                         for (int i =0; i<myBankAccount.size();i++){
-                                            String data= myBankAccount.get(i).getAccountno() + "  $" + Integer.toString(myBankAccount.get(i).getCash());
+                                            String data= myBankAccount.get(i).getAccountno() + "  $" + myBankAccount.get(i).getCash();
                                             items[i] = data;
                                         }
                                         final int[] from = {0};

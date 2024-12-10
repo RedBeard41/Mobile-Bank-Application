@@ -23,14 +23,17 @@ import com.squareup.picasso.Picasso;
 import java.util.ArrayList;
 
 public class CryptoLookAdapter extends RecyclerView.Adapter<CryptoLookAdapter.PostHolder> {
-    private Context context;
-    private ArrayList<CryptoModel> models;
-    private Activity activity;
+    private final Context context;
+    private final ArrayList<CryptoModel> models;
+    private final Activity activity;
 
     class PostHolder extends RecyclerView.ViewHolder{
-        private  Context context;
-        private TextView cryptoNameText,cryptoSymbolText,cryptoAmountText,cryptoPriceText;
-        private ImageView cryptoImageView;
+        private final Context context;
+        private final TextView cryptoNameText;
+        private TextView cryptoSymbolText;
+        private final TextView cryptoAmountText;
+        private final TextView cryptoPriceText;
+        private final ImageView cryptoImageView;
 
 
         public PostHolder(@NonNull View itemView, Context context) {

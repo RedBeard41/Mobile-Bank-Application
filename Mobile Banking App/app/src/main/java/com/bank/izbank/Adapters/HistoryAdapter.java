@@ -20,14 +20,15 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 
 public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.PostHolder> {
-    private Context context;
-    private ArrayList<History> historyArrayList;
-    private Activity activity;
+    private final Context context;
+    private final ArrayList<History> historyArrayList;
+    private final Activity activity;
 
     public class PostHolder extends RecyclerView.ViewHolder {
-        private  Context context;
-        private TextView textViewDate,textViewProcess;
-        private ImageView imageViewHistory;
+        private final Context context;
+        private final TextView textViewDate;
+        private final TextView textViewProcess;
+        private final ImageView imageViewHistory;
         public PostHolder(@NonNull @NotNull View itemView, Context context) {
             super(itemView);
             this.context=context;
@@ -56,7 +57,7 @@ public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.PostHold
     @Override
     public void onBindViewHolder(@NonNull @NotNull PostHolder holder, int position) {
         holder.textViewProcess.setText(historyArrayList.get(position).getProcess());
-        holder.textViewDate.setText((CharSequence) historyArrayList.get(position).getDateString());
+        holder.textViewDate.setText(historyArrayList.get(position).getDateString());
 
     }
 

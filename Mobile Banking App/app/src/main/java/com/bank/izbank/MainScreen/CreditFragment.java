@@ -298,7 +298,7 @@ public class CreditFragment extends Fragment {
             @Override
             public void done(ParseException e) {
                 if(e != null){
-                    Toast.makeText(getApplicationContext(),e.getLocalizedMessage().toString(),Toast.LENGTH_LONG).show();
+                    Toast.makeText(getApplicationContext(), e.getLocalizedMessage(),Toast.LENGTH_LONG).show();
                 }
                 else{
 

@@ -17,8 +17,8 @@ import java.util.List;
 
 public class BillAdapter extends  RecyclerView.Adapter<BillAdapter.CardViewObjectHolder> {
 
-    private Context mContext;
-    private List<Bill> list;
+    private final Context mContext;
+    private final List<Bill> list;
 
     public BillAdapter(Context mContext, List<Bill> list) {
         this.mContext = mContext;

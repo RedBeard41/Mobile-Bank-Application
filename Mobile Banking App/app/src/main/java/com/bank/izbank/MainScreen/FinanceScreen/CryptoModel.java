@@ -7,13 +7,13 @@ import com.google.gson.annotations.SerializedName;
 
 public class CryptoModel {
     @SerializedName("symbol")
-    private String currencySymbol;
+    private final String currencySymbol;
     @SerializedName("name")
-    private String currencyName;
+    private final String currencyName;
     @SerializedName("price")
-    private String price;
+    private final String price;
     @SerializedName("logo_url")
-    private String logoUrl;
+    private final String logoUrl;
     private ImageView image;
     private String amount;
 

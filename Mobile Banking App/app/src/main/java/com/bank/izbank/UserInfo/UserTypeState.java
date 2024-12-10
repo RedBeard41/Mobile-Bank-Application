@@ -4,6 +4,6 @@ import java.util.Stack;
 
 public interface UserTypeState {
 
-    public void TypeChange(User user);
+    void TypeChange(User user);
 
 }
