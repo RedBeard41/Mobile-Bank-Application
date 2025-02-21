@@ -5,33 +5,27 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.bank.izbank.MainScreen.FinanceScreen.CryptoModel;
 import com.bank.izbank.MainScreen.FinanceScreen.FinanceFragment;
 import com.bank.izbank.R;
-import com.bank.izbank.Sign.SignIn;
 import com.bank.izbank.service.ICryptoAPI;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.parse.LogOutCallback;
-import com.parse.ParseException;
-import com.parse.ParseUser;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
+import io.reactivex.rxjava3.disposables.CompositeDisposable;
+import io.reactivex.rxjava3.schedulers.Schedulers;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
+import retrofit2.adapter.rxjava3.RxJava3CallAdapterFactory;
 
 public class MainScreenActivity extends AppCompatActivity {
 
@@ -51,91 +45,169 @@ public class MainScreenActivity extends AppCompatActivity {
     private ArrayList<CryptoModel> cryptoModels;
     private final String BASE_URL = "https://api.nomics.com/v1/";
     private Retrofit retrofit;
-    private ImageView downloadingImageView;
+
+    private CompositeDisposable compositeDisposable = new CompositeDisposable();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_screen);
 
-        //Retrofit & JSON
-        Gson gson=new GsonBuilder().setLenient().create();
-
-        retrofit=new Retrofit.Builder().
-                baseUrl(BASE_URL).
-                addConverterFactory(GsonConverterFactory.create(gson)).
-                build();
-        loadData();
-        //Retrofit end
-
         bottomNavigationView = findViewById(R.id.bottom_navigation);
 
-
+        // Initialize fragments first
         fm.beginTransaction().add(R.id.fragment_container,fragment5,"5").hide(fragment5).commit();
         fm.beginTransaction().add(R.id.fragment_container,fragment4,"4").hide(fragment4).commit();
         fm.beginTransaction().add(R.id.fragment_container,fragment2,"2").hide(fragment2).commit();
         fm.beginTransaction().add(R.id.fragment_container,fragment1,"1").commit();
 
+        // Setup navigation
+        setupNavigation();
 
-        bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
-            @Override
-            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-
-                switch (item.getItemId()){
-                    case R.id.menu1:
-                        fragment1 = new AccountFragment();
-                        fm.beginTransaction().add(R.id.fragment_container,fragment1,"1").commit();
-                        fm.beginTransaction().hide(tempFragment).show(fragment1).commit();
-                        tempFragment = fragment1;
-                        break;
-                    case R.id.menu2:
-
-                        fm.beginTransaction().hide(tempFragment).show(fragment2).commit();
-                        tempFragment = fragment2;
-
-                        break;
-                    case R.id.menu3:
-                        getSupportFragmentManager().beginTransaction().hide(tempFragment).add(R.id.fragment_container,tempFragment=new FinanceFragment(cryptoModels)).show(tempFragment).commit();
-                        break;
-                    case R.id.menu4:
-                        fm.beginTransaction().hide(tempFragment).show(fragment4).commit();
-                        tempFragment = fragment4;
-                        break;
-                    case R.id.menu5:
-                        fm.beginTransaction().hide(tempFragment).show(fragment5).commit();
-                        tempFragment = fragment5;
-                        break;
-
-                }
-
-
-                return true;
-            }
-        });
-
-
+        // Load crypto data after UI is ready
+        initializeRetrofit();
+        loadData();
     }
 
+    private void initializeRetrofit() {
+        Gson gson = new GsonBuilder().setLenient().create();
+        retrofit = new Retrofit.Builder()
+                .baseUrl(BASE_URL)
+                .addCallAdapterFactory(RxJava3CallAdapterFactory.create())
+                .addConverterFactory(GsonConverterFactory.create(gson))
+                .build();
+    }
 
-    private void loadData(){
-        ICryptoAPI cryptoAPI=retrofit.create(ICryptoAPI.class);
-        Call<List<CryptoModel>> call=cryptoAPI.getData();
-        call.enqueue(new Callback<List<CryptoModel>>() {
-            @Override
-            public void onResponse(Call<List<CryptoModel>> call, Response<List<CryptoModel>> response) {
-                if(response.isSuccessful()){
-                    List<CryptoModel> responseList=response.body();
-                    cryptoModels=new ArrayList<>(responseList);
-
-                }
+    private void setupNavigation() {
+        bottomNavigationView.setOnNavigationItemSelectedListener(item -> {
+            switch (item.getItemId()) {
+                case R.id.menu1:
+                    fm.beginTransaction().hide(tempFragment).show(fragment1).commit();
+                    tempFragment = fragment1;
+                    return true;
+                case R.id.menu2:
+                    fm.beginTransaction().hide(tempFragment).show(fragment2).commit();
+                    tempFragment = fragment2;
+                    return true;
+                case R.id.menu3:
+                    if (cryptoModels != null) {
+                        Fragment financeFragment = new FinanceFragment(cryptoModels);
+                        fm.beginTransaction()
+                            .hide(tempFragment)
+                            .add(R.id.fragment_container, financeFragment)
+                            .show(financeFragment)
+                            .commit();
+                        tempFragment = financeFragment;
+                    } else {
+                        Toast.makeText(this, "Loading financial data...", Toast.LENGTH_SHORT).show();
+                    }
+                    return true;
+                case R.id.menu4:
+                    fm.beginTransaction().hide(tempFragment).show(fragment4).commit();
+                    tempFragment = fragment4;
+                    return true;
+                case R.id.menu5:
+                    fm.beginTransaction().hide(tempFragment).show(fragment5).commit();
+                    tempFragment = fragment5;
+                    return true;
             }
-
-            @Override
-            public void onFailure(Call<List<CryptoModel>> call, Throwable t) {
-                Toast.makeText(getApplicationContext(),  t.getLocalizedMessage(), Toast.LENGTH_LONG).show();
-            }
+            return false;
         });
+    }
 
+    private void loadData() {
+        ICryptoAPI cryptoAPI = retrofit.create(ICryptoAPI.class);
+        
+        compositeDisposable.add(
+            cryptoAPI.getData()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(cryptoList -> {
+                    // Success - cryptoList is already the List<CryptoModel>
+                    if (cryptoList != null && !cryptoList.isEmpty()) {
+                        ArrayList<CryptoModel> cryptoModels = new ArrayList<>(cryptoList);
+                        // Load your fragments with the data
+                        loadFragment(cryptoModels);
+                    }
+                }, throwable -> {
+                    // Error handling
+                    System.out.println("Error: " + throwable.getMessage());
+                })
+        );
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        compositeDisposable.clear();
+    }
+
+    private void loadFragment(ArrayList<CryptoModel> cryptoModels) {
+        // Initialize fragments as class fields instead of local variables
+        final Fragment defaultFragment = new AccountFragment();
+        final Fragment creditFragment = new CreditFragment();
+        final Fragment billFragment = new BillFragment();
+        final Fragment settingFragment = new SettingFragment();
+        Fragment currentFragment = defaultFragment;  // Track current fragment
+
+        // Set the default fragment
+        fm.beginTransaction()
+            .add(R.id.fragment_container, settingFragment, "5").hide(settingFragment).commit();
+        fm.beginTransaction()
+            .add(R.id.fragment_container, billFragment, "4").hide(billFragment).commit();
+        fm.beginTransaction()
+            .add(R.id.fragment_container, creditFragment, "2").hide(creditFragment).commit();
+        fm.beginTransaction()
+            .add(R.id.fragment_container, defaultFragment, "1").commit();
+
+        // Setup bottom navigation using your existing menu IDs
+        bottomNavigationView.setOnNavigationItemSelectedListener(item -> {
+            Fragment newFragment;
+            
+            switch (item.getItemId()) {
+                case R.id.menu1:
+                    newFragment = new AccountFragment();
+                    fm.beginTransaction()
+                        .add(R.id.fragment_container, newFragment, "1")
+                        .hide(tempFragment)
+                        .show(newFragment)
+                        .commit();
+                    tempFragment = newFragment;
+                    break;
+                case R.id.menu2:
+                    fm.beginTransaction()
+                        .hide(tempFragment)
+                        .show(creditFragment)
+                        .commit();
+                    tempFragment = creditFragment;
+                    break;
+                case R.id.menu3:
+                    newFragment = new FinanceFragment(cryptoModels);
+                    getSupportFragmentManager()
+                        .beginTransaction()
+                        .hide(tempFragment)
+                        .add(R.id.fragment_container, newFragment)
+                        .show(newFragment)
+                        .commit();
+                    tempFragment = newFragment;
+                    break;
+                case R.id.menu4:
+                    fm.beginTransaction()
+                        .hide(tempFragment)
+                        .show(billFragment)
+                        .commit();
+                    tempFragment = billFragment;
+                    break;
+                case R.id.menu5:
+                    fm.beginTransaction()
+                        .hide(tempFragment)
+                        .show(settingFragment)
+                        .commit();
+                    tempFragment = settingFragment;
+                    break;
+            }
+            return true;
+        });
     }
 
 

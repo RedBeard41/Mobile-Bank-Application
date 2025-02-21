@@ -3,8 +3,10 @@ package com.bank.izbank.splashScreen;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.Toast;
@@ -42,6 +44,19 @@ public class splashScreen extends AppCompatActivity {
     private UserTypeState normalUser;
     public static UserTypeState adminUser;
 
+    private User loadUserFromPrefs() {
+        SharedPreferences prefs = getSharedPreferences("UserData", MODE_PRIVATE);
+        String userId = prefs.getString("userId", null);
+        if (userId == null) return null;
+
+        User user = new User();
+        user.setId(userId);
+        user.setName(prefs.getString("userName", ""));
+        user.setPass(prefs.getString("userPass", ""));
+        user.setPhoneNumber(prefs.getString("userPhone", ""));
+        // Load other user fields as needed
+        return user;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,31 +80,41 @@ public class splashScreen extends AppCompatActivity {
 
         }
 
-
-
-
-
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
-                if(mainUser.getId().equals("9999") &&  mainUser.getName().equals("admin")){
-                    userContext.setState(adminUser);
-                    userContext.TypeChange(mainUser);
-                    Intent intent = new Intent( splashScreen.this, AdminPanelActivity.class);
-
-                    startActivity(intent);
-                }else{
-                    userContext.setState(mainUser);
-                    Intent splashIntent = new Intent( splashScreen.this, MainScreenActivity.class);
-                    splashScreen.this.startActivity(splashIntent);
+                // Try to load user data if mainUser is null
+                if (mainUser == null) {
+                    mainUser = loadUserFromPrefs();
                 }
 
-                splashScreen.this.finish();
+                if (mainUser == null) {
+                    Log.e("splashScreen", "No user data found, redirecting to SignIn");
+                    Intent intent = new Intent(splashScreen.this, SignIn.class);
+                    startActivity(intent);
+                    finish();
+                    return;
+                }
+
+                try {
+                    if (mainUser.getId().equals("9999") && mainUser.getName().equals("admin")) {
+                        userContext.setState(adminUser);
+                        userContext.TypeChange(mainUser);
+                        Intent intent = new Intent(splashScreen.this, AdminPanelActivity.class);
+                        startActivity(intent);
+                    } else {
+                        userContext.setState(mainUser);
+                        Intent splashIntent = new Intent(splashScreen.this, MainScreenActivity.class);
+                        startActivity(splashIntent);
+                    }
+                    finish();
+                } catch (Exception e) {
+                    Log.e("splashScreen", "Error in navigation: " + e.getMessage());
+                    Intent intent = new Intent(splashScreen.this, SignIn.class);
+                    startActivity(intent);
+                    finish();
+                }
             }
-        },5000);
-
-
+        }, 5000);
     }
-
-
 }

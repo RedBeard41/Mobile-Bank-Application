@@ -160,9 +160,19 @@ public User(){
         this.job = job;
     }
 
-    public String addressWrite(){
-     addressSum=address.getStreet()+" "+address.getNeighborhood()+" "+address.getApartmentNumber()+" "+address.getFloor()+" "+address.getHomeNumber()+" "+address.getCity()+" "+address.getProvince()+" "+address.getCountry();
-     return addressSum;
+    public String addressWrite() {
+        if (address == null) {
+            return "No address set";  // or return empty string ""
+        }
+        addressSum = address.getStreet() + " " +
+                    address.getNeighborhood() + " " +
+                    address.getApartmentNumber() + " " +
+                    address.getFloor() + " " +
+                    address.getHomeNumber() + " " +
+                    address.getCity() + " " +
+                    address.getProvince() + " " +
+                    address.getCountry();
+        return addressSum;
     }
 
     public ArrayList<Bill> getUserbills() {

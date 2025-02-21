@@ -3,9 +3,11 @@ package com.bank.izbank.Sign;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -15,6 +17,7 @@ import com.bank.izbank.Bill.Date;
 import com.bank.izbank.Credit.Credit;
 import com.bank.izbank.Job.Job;
 import com.bank.izbank.MainScreen.AdminPanelActivity;
+import com.bank.izbank.MainScreen.MainScreenActivity;
 import com.bank.izbank.R;
 import com.bank.izbank.UserInfo.Address;
 import com.bank.izbank.UserInfo.Admin;
@@ -33,6 +36,7 @@ import com.parse.ParseFile;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.parse.ParseUser;
+import com.parse.SaveCallback;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -194,34 +198,53 @@ public class SignIn extends AppCompatActivity {
 
 
 
-    public void getBankAccounts(User user){
-        ParseQuery<ParseObject> queryBankAccount=ParseQuery.getQuery("BankAccount");
-        queryBankAccount.whereEqualTo("userId", user.getId());
-        queryBankAccount.findInBackground(new FindCallback<ParseObject>() {
+    public void getBankAccounts(User user) {
+        ParseQuery<ParseObject> query = ParseQuery.getQuery("BankAccount");
+        query.whereEqualTo("userId", user.getId());
+        // Try local first
+        query.fromLocalDatastore();
+        query.findInBackground(new FindCallback<ParseObject>() {
             @Override
             public void done(List<ParseObject> objects, ParseException e) {
-                if(e!=null){
-                    e.printStackTrace();
-                }else{
-                    bankAccounts = new ArrayList<>();
-                    if(objects.size()>0){
-                        for(ParseObject object:objects){
-
-                            bankAccountNo=object.getString("accountNo");
-                            bankCash=object.getString("cash");
-                            bankAccounts.add(new BankAccount(bankAccountNo,Integer.parseInt(bankCash)));
-
+                if (objects != null && objects.size() > 0) {
+                    // Found local data
+                    handleBankAccounts(objects, user);
+                } else {
+                    // Try online
+                    ParseQuery<ParseObject> onlineQuery = ParseQuery.getQuery("BankAccount");
+                    onlineQuery.whereEqualTo("userId", user.getId());
+                    onlineQuery.findInBackground(new FindCallback<ParseObject>() {
+                        @Override
+                        public void done(List<ParseObject> objects, ParseException e) {
+                            if (e == null && objects.size() > 0) {
+                                // Pin data for offline access
+                                ParseObject.pinAllInBackground("BankAccounts", objects, 
+                                    new SaveCallback() {
+                                        @Override
+                                        public void done(ParseException e) {
+                                            if (e == null) {
+                                                handleBankAccounts(objects, user);
+                                            }
+                                        }
+                                });
+                            }
                         }
-
-
-                    }
-                    user.setBankAccounts(bankAccounts);
+                    });
                 }
-
-
             }
         });
     }
+
+    private void handleBankAccounts(List<ParseObject> objects, User user) {
+        bankAccounts = new ArrayList<>();
+        for (ParseObject object : objects) {
+            bankAccountNo = object.getString("accountNo");
+            bankCash = object.getString("cash");
+            bankAccounts.add(new BankAccount(bankAccountNo, Integer.parseInt(bankCash)));
+        }
+        user.setBankAccounts(bankAccounts);
+    }
+
     public void getHistory(){
         ParseQuery<ParseObject> queryBankAccount=ParseQuery.getQuery("History");
         if (!mainUser.getId().equals("9999")){
@@ -312,95 +335,109 @@ public class SignIn extends AppCompatActivity {
         });
     }
 
-
-
-
-    public void signIn(View view){
-        //loading screen
-
-
-
-        ParseUser.logInInBackground(userName.getText().toString(), userPass.getText().toString(), new LogInCallback() {
-            @Override
-            public void done(ParseUser user, ParseException e) {
-                if(e !=null){
-                    Toast.makeText(getApplicationContext(),e.getLocalizedMessage(),Toast.LENGTH_LONG).show();
-                }else{
-
-                    ParseQuery<ParseObject> query=ParseQuery.getQuery("UserInfo");
-                    query.whereEqualTo("username",userName.getText().toString());
-                    query.findInBackground(new FindCallback<ParseObject>() {
-                        @Override
-                        public void done(List<ParseObject> objects, ParseException e) {
-                            if(e!=null){
-                                e.printStackTrace();
-                            }else{
-
-                                if(objects.size()>0){
-                                    for(ParseObject object:objects){
-
-                                        String name=object.getString("userRealName");
-                                        String phone=object.getString("phone");
-                                        String userId=object.getString("username");
-                                        String address_string= object.getString("address");
-                                        String[] str = address_string.split(" ");
-                                        Address address = new Address(str[0],str[1],Integer.parseInt(str[2]),Integer.parseInt(str[3]),Integer.parseInt(str[4]),str[5],str[6],str[7]);
-                                        String jobName = object.getString("job");
-                                        String maxCreditAmount = object.getString("maxCreditAmount");
-                                        String maxCreditInstallment = object.getString("maxCreditInstallment");
-                                        String interestRate = object.getString("interestRate");
-
-                                        Job tempJob = new Job(jobName,maxCreditAmount,maxCreditInstallment,interestRate);
-
-                                        mainUser = new User(name,userId, phone,address,tempJob);
-                                        ParseFile parseFile=(ParseFile)object.get("images");
-                                       if( parseFile!=null){
-                                           parseFile.getDataInBackground(new GetDataCallback() {
-                                               @Override
-                                               public void done(byte[] data, ParseException e) {
-                                                   if(data!=null && e==null){
-                                                       Bitmap downloadedImage= BitmapFactory.decodeByteArray(data,0,data.length);
-                                                       mainUser.setPhoto(downloadedImage);
-
-                                                   }
-                                               }
-                                           });
-                                       }
-
-
-                                        Toast.makeText(getApplicationContext(),"Welcome "+name,Toast.LENGTH_LONG).show();
-
-
-
-
-                                        getBankAccounts(mainUser);
-                                        getCreditCards(mainUser);
-                                        getHistory();
-                                        getUserBills();
-                                        getUserCredits();
-
-
-
-                                    }
-
-
-                                }
-                            }
-
-                        }
-                    });
-
-
-                    intent = new Intent(SignIn.this, splashScreen.class);
-                    startActivity(intent);
-
-
-
-
-
-                }
-            }
-        });
+    private void saveUserToPrefs(User user) {
+        SharedPreferences prefs = getSharedPreferences("UserData", MODE_PRIVATE);
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putString("userId", user.getId());
+        editor.putString("userName", user.getName());
+        editor.putString("userPass", user.getPass());
+        editor.putString("userPhone", user.getPhoneNumber());
+        // Add other user fields as needed
+        editor.apply();
     }
 
+    public void signIn(View view) {
+        String inputUsername = userName.getText().toString();
+        String inputPassword = userPass.getText().toString();
+
+        if (inputUsername.isEmpty() || inputPassword.isEmpty()) {
+            Toast.makeText(getApplicationContext(),
+                "Please enter username and password",
+                Toast.LENGTH_LONG).show();
+            return;
+        }
+
+        // Check local storage
+        ParseQuery<ParseObject> localQuery = ParseQuery.getQuery("UserInfo");
+        localQuery.fromLocalDatastore();
+        localQuery.whereEqualTo("username", inputUsername);
+        
+        try {
+            List<ParseObject> localUsers = localQuery.find();
+            if (localUsers != null && !localUsers.isEmpty()) {
+                ParseObject userObject = localUsers.get(0);
+                if (inputPassword.equals(userObject.getString("password"))) {
+                    handleUserObject(userObject);
+                    
+                    Log.d("SignIn", "Login successful, starting splash screen");
+                    Intent intent = new Intent(getApplicationContext(), splashScreen.class);
+                    startActivity(intent);
+                    finish();
+                } else {
+                    Toast.makeText(getApplicationContext(), 
+                        "Invalid password", 
+                        Toast.LENGTH_LONG).show();
+                }
+            } else {
+                Toast.makeText(getApplicationContext(), 
+                    "User not found", 
+                    Toast.LENGTH_LONG).show();
+            }
+        } catch (Exception e) {
+            Log.e("SignIn", "Error: " + e.getMessage());
+            e.printStackTrace();
+            Toast.makeText(getApplicationContext(), 
+                "Error: " + e.getMessage(), 
+                Toast.LENGTH_LONG).show();
+        }
+    }
+
+    private void handleUserObject(ParseObject object) {
+        mainUser = new User();
+        mainUser.setName(object.getString("userRealName"));
+        mainUser.setId(object.getString("username"));
+        mainUser.setPass(object.getString("password"));
+        mainUser.setPhoneNumber(object.getString("phone"));
+        
+        // Only set address if it exists
+        String addressStr = object.getString("address");
+        if (addressStr != null && !addressStr.isEmpty()) {
+            String[] addressParts = addressStr.split(" ");
+            if (addressParts.length >= 8) {
+                Address address = new Address(
+                    addressParts[0],                    // street
+                    addressParts[1],                    // neighborhood
+                    Integer.parseInt(addressParts[2]),  // apartmentNumber
+                    Integer.parseInt(addressParts[3]),  // floor
+                    Integer.parseInt(addressParts[4]),  // homeNumber
+                    addressParts[5],                    // city
+                    addressParts[6],                    // province
+                    addressParts[7]                     // country
+                );
+                mainUser.setAddress(address);
+            }
+        }
+        
+        // Save user data to SharedPreferences
+        saveUserToPrefs(mainUser);
+        
+        // Create and set job
+        if (object.getString("job") != null) {
+            Job job = new Job(
+                object.getString("job"),
+                String.valueOf(object.getDouble("maxCreditAmount")),
+                String.valueOf(object.getDouble("maxCreditInstallment")),
+                String.valueOf(object.getDouble("interestRate"))
+            );
+            mainUser.setJob(job);
+        }
+
+        getBankAccounts(mainUser);
+        getCreditCards(mainUser);
+        getUserBills();
+        getUserCredits();
+
+        intent = new Intent(SignIn.this, splashScreen.class);
+        startActivity(intent);
+    }
 }

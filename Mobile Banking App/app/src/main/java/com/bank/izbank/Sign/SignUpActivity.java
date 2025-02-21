@@ -7,6 +7,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
@@ -36,6 +37,7 @@ import com.bank.izbank.R;
 import com.bank.izbank.UserInfo.Address;
 import com.bank.izbank.UserInfo.User;
 import com.parse.FindCallback;
+import com.parse.LogInCallback;
 import com.parse.ParseException;
 import com.parse.ParseFile;
 import com.parse.ParseObject;
@@ -107,69 +109,96 @@ public class SignUpActivity extends AppCompatActivity {
 
     }
 
-    public void signUp(View view){
-        mainUser=new User(userNameText.getText().toString(),
-                userIdText.getText().toString(),
-                userPassText.getText().toString(),
-                userPhoneText.getText().toString(),newAddress
-                );
-
-        ParseUser parseUser=new ParseUser();
-        parseUser.setUsername(mainUser.getId());
-        parseUser.setPassword(mainUser.getPass());
-
-
-
-        ParseObject object=new ParseObject("UserInfo");
-        object.put("userRealName",mainUser.getName());
-        object.put("phone",mainUser.getPhoneNumber());
-        object.put("address",mainUser.addressWrite());
-        object.put("username", mainUser.getId());
-
-
-        for(Job x:defaultJobs){
-            if(x.getName().equals(job)){
-                tempJob=x;
-                break;
-            }
+    public void signUp(View view) {
+        if (!isValidSignup()) {
+            return;
         }
 
-        mainUser.setJob(tempJob);
-        object.put("job",tempJob.getName());
-        object.put("maxCreditAmount",tempJob.getMaxCreditAmount());
-        object.put("maxCreditInstallment",tempJob.getMaxCreditInstallment());
-        object.put("interestRate",tempJob.getInterestRate());
-        object.put("address",mainUser.addressWrite());
+        // Create user with basic required fields
+        mainUser = new User(
+            userNameText.getText().toString(),
+            userIdText.getText().toString(),
+            userPassText.getText().toString(),
+            userPhoneText.getText().toString(),
+            null  // Address is optional
+        );
 
-        object.saveInBackground(new SaveCallback() {
-            @Override
-            public void done(ParseException e) {
-                if(e != null){
-                    Toast.makeText(getApplicationContext(), e.getLocalizedMessage(),Toast.LENGTH_LONG).show();
-                }
-
-            }
-        });
-
-       parseUser.signUpInBackground(new SignUpCallback() {
-            @Override
-            public void done(ParseException e) {
-                if(e != null){
-                    Toast.makeText(getApplicationContext(),e.getLocalizedMessage(),Toast.LENGTH_LONG).show();
-                }
-                else{
-                    Toast.makeText(getApplicationContext(),"User Created" ,Toast.LENGTH_LONG).show();
-                    Intent intent=new Intent(getApplicationContext(), MainScreenActivity.class);
-                    startActivity(intent);
-
-                    //intent
-                }
-            }
-        });
-
-
+        // Create UserInfo object
+        ParseObject userInfo = new ParseObject("UserInfo");
+        populateUserInfo(userInfo);
+        
+        // Save locally
+        try {
+            userInfo.pin();
+            Log.d("SignUpActivity", "User data saved locally");
+            Toast.makeText(getApplicationContext(), 
+                "User Created Successfully", 
+                Toast.LENGTH_LONG).show();
+            
+            // Go to sign in
+            Intent intent = new Intent(getApplicationContext(), SignIn.class);
+            startActivity(intent);
+            finish();
+        } catch (ParseException e) {
+            Log.e("SignUpActivity", "Error saving locally: " + e.getMessage());
+            Toast.makeText(getApplicationContext(), 
+                "Error creating user: " + e.getMessage(), 
+                Toast.LENGTH_LONG).show();
+        }
     }
 
+    private void populateUserInfo(ParseObject userInfo) {
+        // Set only required fields
+        userInfo.put("username", mainUser.getId());
+        userInfo.put("password", mainUser.getPass());
+        userInfo.put("userRealName", mainUser.getName());
+        userInfo.put("phone", mainUser.getPhoneNumber());
+        
+        // Only add address if it exists
+        if (newAddress != null) {
+            userInfo.put("address", mainUser.addressWrite());
+        }
+
+        // Set job info if selected
+        if (job != null) {
+            for (Job x : defaultJobs) {
+                if (x.getName().equals(job)) {
+                    tempJob = x;
+                    break;
+                }
+            }
+            if (tempJob != null) {
+                mainUser.setJob(tempJob);
+                userInfo.put("job", tempJob.getName());
+                userInfo.put("maxCreditAmount", tempJob.getMaxCreditAmount());
+                userInfo.put("maxCreditInstallment", tempJob.getMaxCreditInstallment());
+                userInfo.put("interestRate", tempJob.getInterestRate());
+            }
+        }
+    }
+
+    private boolean isValidSignup() {
+        // Check only required fields
+        if (userNameText.getText().toString().isEmpty() ||
+            userIdText.getText().toString().isEmpty() ||
+            userPassText.getText().toString().isEmpty() ||
+            userPhoneText.getText().toString().isEmpty()) {
+            Toast.makeText(getApplicationContext(), 
+                "Please fill all required fields", 
+                Toast.LENGTH_LONG).show();
+            return false;
+        }
+
+        // Check password length
+        if (userPassText.getText().toString().length() < 6) {
+            Toast.makeText(getApplicationContext(), 
+                "Password must be at least 6 characters", 
+                Toast.LENGTH_LONG).show();
+            return false;
+        }
+
+        return true;
+    }
 
     public void createAddress(View v){
 

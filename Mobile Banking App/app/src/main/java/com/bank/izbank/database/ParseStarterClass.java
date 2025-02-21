@@ -15,6 +15,7 @@ public class ParseStarterClass extends Application {
                 // if desired
                 .clientKey("pt1i1StL5R4KQLkEK42PJsJBUs6MPAabZiouiikP")
                 .server("https://parseapi.back4app.com/")
+                .enableLocalDataStore()
                 .build()
         );
 

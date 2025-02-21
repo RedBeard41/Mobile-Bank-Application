@@ -48,6 +48,11 @@ import java.util.Stack;
 import static com.bank.izbank.Sign.SignIn.mainUser;
 import static com.parse.Parse.getApplicationContext;
 
+import io.reactivex.rxjava3.disposables.CompositeDisposable;
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
+import io.reactivex.rxjava3.schedulers.Schedulers;
+import com.bank.izbank.service.CryptoService;
+
 public class FinanceFragment extends Fragment implements SearchView.OnQueryTextListener {
         //exchange https://nomics.com/docs/#tag/Exchange-Rates
         //https://api.nomics.com/v1/exchange-rates?key=c5d0683b83dc6e2dbd00841b72f7c86c
@@ -65,6 +70,8 @@ public class FinanceFragment extends Fragment implements SearchView.OnQueryTextL
     private String buyedCrptoAmount;
     private CryptoLookAdapter cryptoLookPopup;
     private  int index;
+    private CryptoService cryptoService;
+    private CompositeDisposable compositeDisposable = new CompositeDisposable();
 
     public FinanceFragment(ArrayList<CryptoModel> list){
         this.cryptoModels=list;
@@ -421,5 +428,30 @@ public class FinanceFragment extends Fragment implements SearchView.OnQueryTextL
         SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy");
         Date currentTime = Calendar.getInstance().getTime();
         return currentTime;
+    }
+
+    private void loadCryptoData() {
+        cryptoService = new CryptoService();
+        compositeDisposable.add(
+            cryptoService.getCryptoData()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(cryptoList -> {
+                    // Success
+                    cryptoModels.clear();
+                    cryptoModels.addAll(cryptoList);
+                    cryptoPostAdapter.notifyDataSetChanged();
+                }, throwable -> {
+                    // Error
+                    Toast.makeText(getContext(), "Error loading crypto data: " + throwable.getMessage(), 
+                        Toast.LENGTH_SHORT).show();
+                })
+        );
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        compositeDisposable.clear();
     }
 }

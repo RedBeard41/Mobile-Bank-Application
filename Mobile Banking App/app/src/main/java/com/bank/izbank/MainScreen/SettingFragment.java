@@ -103,7 +103,10 @@ public class SettingFragment extends Fragment {
         name.setText(mainUser.getName());
         phone.setText(mainUser.getPhoneNumber());
         userId.setText(mainUser.getId());
-        userAdress.setText(mainUser.addressWrite());
+        if (SignIn.mainUser != null) {
+            String address = SignIn.mainUser.addressWrite();
+            userAdress.setText(address);
+        }
         prof.setText(mainUser.getJob().getName());
         if(mainUser.getPhoto()!=null){
             imageView.setImageBitmap(mainUser.getPhoto());
