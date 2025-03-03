@@ -46,7 +46,7 @@ import com.bank.izbank.Job.Teacher;
 import com.bank.izbank.Job.Waiter;
 import com.bank.izbank.Job.Worker;
 import com.bank.izbank.R;
-import com.bank.izbank.Sign.SignIn;
+import com.bank.izbank.Sign.SignInActivity;
 import com.bank.izbank.UserInfo.Address;
 import com.parse.DeleteCallback;
 import com.parse.FindCallback;
@@ -60,17 +60,20 @@ import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.parse.ParseUser;
 import com.parse.SaveCallback;
+import com.bank.izbank.UserInfo.User;
+import com.bank.izbank.config.BankConfig;
+import com.bank.izbank.persistence.JSON.JsonStorage;
 
 import java.io.ByteArrayOutputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.bank.izbank.Sign.SignIn.mainUser;
 import static com.parse.Parse.getApplicationContext;
+import com.bank.izbank.config.BankConfig;
 
 public class SettingFragment extends Fragment {
-   private TextView name,phone,userId,userAdress,prof,logOut;
+    private TextView name,phone,userId,userAdress,prof,logOut;
     private Bitmap selectedImage;
     private ImageView imageView;
     private Spinner spinner;
@@ -81,6 +84,19 @@ public class SettingFragment extends Fragment {
     private String [] jobs;
     private Job [] defaultJobs;
     private  String job;
+    private AlertDialog.Builder ad;
+    private JsonStorage jsonStorage;
+    private User mainUser;
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        if (!User.isStorageInitialized()) {
+            User.initializeStorage(getContext());
+        }
+        mainUser = SignInActivity.mainUser;
+        ad = new AlertDialog.Builder(getContext());
+    }
 
     @Nullable
     @Override
@@ -103,11 +119,15 @@ public class SettingFragment extends Fragment {
         name.setText(mainUser.getName());
         phone.setText(mainUser.getPhoneNumber());
         userId.setText(mainUser.getId());
-        if (SignIn.mainUser != null) {
-            String address = SignIn.mainUser.addressWrite();
+        if (SignInActivity.mainUser != null) {
+            String address = SignInActivity.mainUser.addressWrite();
             userAdress.setText(address);
         }
-        prof.setText(mainUser.getJob().getName());
+        if (mainUser != null && mainUser.getJob() != null) {
+            prof.setText(mainUser.getJob().getName());
+        } else {
+            prof.setText(BankConfig.SETTINGS_NOT_SPECIFIED);
+        }
         if(mainUser.getPhoto()!=null){
             imageView.setImageBitmap(mainUser.getPhoto());
         }
@@ -141,7 +161,7 @@ public class SettingFragment extends Fragment {
         relativeLayoutPassRow.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                changePass(v);
+                changePassword();
             }
         });
 
@@ -160,7 +180,7 @@ relativeLayoutDeleteRow.setOnClickListener(new View.OnClickListener() {
 logOut.setOnClickListener(new View.OnClickListener() {
     @Override
     public void onClick(View v) {
-        logOut(v);
+        logOut();
     }
 });
     }
@@ -168,11 +188,9 @@ logOut.setOnClickListener(new View.OnClickListener() {
     public void changeName(View v){
 
         final EditText editText = new EditText(getContext());
-        editText.setHint("Enter new Name");
+        editText.setHint(BankConfig.SETTINGS_CHANGE_NAME_HINT);
 
-        AlertDialog.Builder ad = new AlertDialog.Builder(getContext());
-
-        ad.setTitle("Change Name");
+        ad.setTitle(BankConfig.SETTINGS_CHANGE_NAME_TITLE);
         ad.setIcon(R.drawable.ic_name);
         ad.setView(editText);
         ad.setPositiveButton("Change", new DialogInterface.OnClickListener() {
@@ -187,21 +205,17 @@ logOut.setOnClickListener(new View.OnClickListener() {
         ad.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                Toast.makeText(getContext(),"Canceled",Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(), BankConfig.SETTINGS_CANCELED, BankConfig.TOAST_SHORT).show();
             }
         });
         ad.create().show();
 
     }
-    public void changePass(View v){
+    public void changePassword(){
 
+        ad.setTitle(BankConfig.SETTINGS_CHANGE_PASS_TITLE);
+        ad.setMessage(BankConfig.SETTINGS_CHANGE_PASS_HINT);
         final EditText editText = new EditText(getContext());
-        editText.setHint("Enter new Password");
-
-        AlertDialog.Builder ad = new AlertDialog.Builder(getContext());
-
-        ad.setTitle("Change Password");
-        ad.setIcon(R.drawable.ic_user_def);
         ad.setView(editText);
         ad.setPositiveButton("Change", new DialogInterface.OnClickListener() {
             @Override
@@ -213,8 +227,7 @@ logOut.setOnClickListener(new View.OnClickListener() {
                    @Override
                    public void done(ParseException e) {
                        if(e ==null ) {
-
-                           Toast.makeText(getContext(),"Password changed",Toast.LENGTH_SHORT).show();
+                           Toast.makeText(getContext(), BankConfig.SETTINGS_PASS_CHANGED, BankConfig.TOAST_SHORT).show();
                        } else {
                            Toast.makeText(getContext(),e.getLocalizedMessage(),Toast.LENGTH_SHORT).show();
                        }
@@ -225,7 +238,7 @@ logOut.setOnClickListener(new View.OnClickListener() {
         ad.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                Toast.makeText(getContext(),"Canceled",Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(), BankConfig.SETTINGS_CANCELED, BankConfig.TOAST_SHORT).show();
             }
         });
         ad.create().show();
@@ -234,11 +247,9 @@ logOut.setOnClickListener(new View.OnClickListener() {
     public void changePhone(View v){
 
         final EditText editTextPhone = new EditText(getContext());
-        editTextPhone.setHint("Enter new Phone");
+        editTextPhone.setHint(BankConfig.SETTINGS_CHANGE_PHONE_HINT);
 
-        AlertDialog.Builder ad = new AlertDialog.Builder(getContext());
-
-        ad.setTitle("Change Phone");
+        ad.setTitle(BankConfig.SETTINGS_CHANGE_PHONE_TITLE);
         ad.setIcon(R.drawable.ic_mobile);
         ad.setView(editTextPhone);
         ad.setPositiveButton("Change", new DialogInterface.OnClickListener() {
@@ -253,7 +264,7 @@ logOut.setOnClickListener(new View.OnClickListener() {
         ad.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                Toast.makeText(getContext(),"Canceled",Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(), BankConfig.SETTINGS_CANCELED, BankConfig.TOAST_SHORT).show();
             }
         });
         ad.create().show();
@@ -262,9 +273,7 @@ logOut.setOnClickListener(new View.OnClickListener() {
     }
     public void changeAddress(View v){
 
-        AlertDialog.Builder ad = new AlertDialog.Builder(getContext());
-
-        ad.setTitle("Change Address");
+        ad.setTitle(BankConfig.SETTINGS_CHANGE_ADDRESS_TITLE);
         ad.setIcon(R.drawable.ic_address);
         LayoutInflater inflater = getActivity().getLayoutInflater();
         View dialogView= inflater.inflate(R.layout.settings_address_popup, null);
@@ -286,7 +295,7 @@ logOut.setOnClickListener(new View.OnClickListener() {
                     userAdress.setText(mainUser.addressWrite());
                     change(mainUser.addressWrite(),"address");
                 }else{
-                    Toast.makeText(getContext(),"Please Fill the all field",Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), BankConfig.SETTINGS_ADDRESS_ERROR, BankConfig.TOAST_SHORT).show();
                 }
 
 
@@ -295,7 +304,7 @@ logOut.setOnClickListener(new View.OnClickListener() {
         ad.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                Toast.makeText(getContext(),"Canceled",Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(), BankConfig.SETTINGS_CANCELED, BankConfig.TOAST_SHORT).show();
             }
         });
         ad.create().show();
@@ -305,162 +314,14 @@ logOut.setOnClickListener(new View.OnClickListener() {
 
 
     private void deleteAccount(View v){
-        ParseUser user = ParseUser.getCurrentUser();
-
-        ParseQuery<ParseObject> queryBankAccount=ParseQuery.getQuery("BankAccount");
-        queryBankAccount.whereEqualTo("userId", mainUser.getId());
-        queryBankAccount.findInBackground(new FindCallback<ParseObject>() {
-            @Override
-            public void done(List<ParseObject> objects, ParseException e) {
-                if(e!=null){
-                    e.printStackTrace();
-                }else{
-                    if(objects.size()>0){
-                        ParseObject.deleteAllInBackground(objects);
-                    }
-                }
-            }
-        });
-        ParseQuery<ParseObject> queryDel=ParseQuery.getQuery("Bill");
-        queryDel.whereEqualTo("username", mainUser.getId());
-        queryDel.findInBackground(new FindCallback<ParseObject>() {
-            @Override
-            public void done(List<ParseObject> objects, ParseException e) {
-                if(e!=null){
-                    e.printStackTrace();
-                }else{
-                    if(objects.size()>0){
-                        ParseObject.deleteAllInBackground(objects);
-                    }
-                }
-            }
-        });
-        ParseQuery<ParseObject> queryDel2=ParseQuery.getQuery("Credit");
-        queryDel2.whereEqualTo("username", mainUser.getId());
-        queryDel2.findInBackground(new FindCallback<ParseObject>() {
-            @Override
-            public void done(List<ParseObject> objects, ParseException e) {
-                if(e!=null){
-                    e.printStackTrace();
-                }else{
-                    if(objects.size()>0){
-                        ParseObject.deleteAllInBackground(objects);
-                    }
-                }
-            }
-        });
-        ParseQuery<ParseObject> queryDel3=ParseQuery.getQuery("CreditCard");
-        queryDel3.whereEqualTo("userId", mainUser.getId());
-        queryDel3.findInBackground(new FindCallback<ParseObject>() {
-            @Override
-            public void done(List<ParseObject> objects, ParseException e) {
-                if(e!=null){
-                    e.printStackTrace();
-                }else{
-                    if(objects.size()>0){
-                        ParseObject.deleteAllInBackground(objects);
-                    }
-                }
-            }
-        });
-        ParseQuery<ParseObject> queryDel4=ParseQuery.getQuery("CryptoAmount");
-        queryDel4.whereEqualTo("username",mainUser.getId());
-        queryDel4.findInBackground(new FindCallback<ParseObject>() {
-            @Override
-            public void done(List<ParseObject> objects, ParseException e) {
-                if(e!=null){
-                    e.printStackTrace();
-                }else{
-                    if(objects.size()>0){
-                        ParseObject.deleteAllInBackground(objects);
-                    }
-                }
-            }
-        });
-        ParseQuery<ParseObject> queryDel5=ParseQuery.getQuery("History");
-        queryDel5.whereEqualTo("userId", mainUser.getId());
-        queryDel5.findInBackground(new FindCallback<ParseObject>() {
-            @Override
-            public void done(List<ParseObject> objects, ParseException e) {
-                if(e!=null){
-                    e.printStackTrace();
-                }else{
-                    if(objects.size()>0){
-                        ParseObject.deleteAllInBackground(objects);
-                    }
-                }
-            }
-        });
-        ParseQuery<ParseObject> queryDel6=ParseQuery.getQuery("UserInfo");
-        queryDel6.whereEqualTo("username", mainUser.getId());
-        queryDel6.findInBackground(new FindCallback<ParseObject>() {
-            @Override
-            public void done(List<ParseObject> objects, ParseException e) {
-                if(e!=null){
-                    e.printStackTrace();
-                }else{
-                    if(objects.size()>0){
-                        ParseObject.deleteAllInBackground(objects);
-
-                    }
-                }
-            }
-        });
-
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                user.deleteInBackground(new DeleteCallback() {
-                    @Override
-                    public void done(com.parse.ParseException e) {
-                        if (e == null) {
-                            Toast.makeText(getContext(), user.getUsername() + " deleted", Toast.LENGTH_SHORT).show();
-                        } else {
-                            Toast.makeText(getContext(), user.getUsername() + "not deleted", Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                });
-            }
-            },1000);
-
-
-        Intent intent=new Intent(getActivity(),SignIn.class);
+        jsonStorage.deleteUserData(mainUser.getId());
+        Intent intent = new Intent(getActivity(), SignInActivity.class);
         startActivity(intent);
-
     }
 
-    private void change(String changeItem,String changeColumName){
-        ParseQuery<ParseObject> query = ParseQuery.getQuery("UserInfo");
-        query.whereEqualTo("username", SignIn.mainUser.getId());
-        query.findInBackground(new FindCallback<ParseObject>() {
-            @Override
-            public void done(List<ParseObject> objects, ParseException e) {
-                if (e != null) {
-                    e.printStackTrace();
-                } else {
-                    if (objects.size() > 0) {
-                        for (ParseObject object : objects) {
-                            ParseObject user = objects.get(0);
-                            user.put(changeColumName,changeItem );
-                            user.saveInBackground(new SaveCallback() {
-                                @Override
-                                public void done(ParseException e) {
-                                    if (e != null) {
-                                        Toast.makeText(getContext(), e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
-                                    }
-                                }
-                            });
-                        }
-                    }
-
-                }
-            }
-            });
+    private void change(String changeItem, String changeColumnName) {
+        mainUser.updateInfo(changeColumnName, changeItem);
     }
-
-
-
-
 
     public void selectImage(View view){
         if(ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.READ_EXTERNAL_STORAGE)!= PackageManager.PERMISSION_GRANTED){
@@ -472,52 +333,52 @@ logOut.setOnClickListener(new View.OnClickListener() {
         }
     }
 
-    public void defineJobSpinner(){
-
-        defaultJobs = new Job[]{new Contractor(),new Doctor(),new Driver(),new Engineer(),new Entrepreneur(),
-                new Farmer(),new Police(),new Soldier(),new Sportsman(),new Student(),new Teacher(),new Waiter(),new Worker()};
-
-        jobs = new String[] {"Contractor","Doctor","Driver","Engineer","Entrepreneur","Farmer","Police","Soldier",
-                "Sportsman","Student","Teacher","Waiter","Worker"};
-
-        jobArrayAdapter = new ArrayAdapter(getContext(),R.layout.support_simple_spinner_dropdown_item,jobs);
-
+    public void defineJobSpinner() {
+        jobs = new String[]{
+            "Doctor", "Engineer", "Teacher", "Police", "Soldier",
+            "Driver", "Worker", "Farmer", "Student", "Waiter",
+            "Contractor", "Entrepreneur", "Sportsman"
+        };
+        
+        defaultJobs = new Job[]{
+            new Doctor(), new Engineer(), new Teacher(), new Police(),
+            new Soldier(), new Driver(), new Worker(), new Farmer(),
+            new Student(), new Waiter(), new Contractor(),
+            new Entrepreneur(), new Sportsman()
+        };
+        
+        jobArrayAdapter = new ArrayAdapter<>(
+            requireContext(),
+            android.R.layout.simple_spinner_item,
+            jobs
+        );
+        jobArrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(jobArrayAdapter);
+        
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
-            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-
-
-                job = adapterView.getSelectedItem().toString();
-
-                change( job,"job");
-                prof.setText( job);
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                job = jobs[position];
+                mainUser.setJob(defaultJobs[position]);
+                mainUser.save();
+                prof.setText(job);
             }
 
             @Override
-            public void onNothingSelected(AdapterView<?> adapterView) {
-
+            public void onNothingSelected(AdapterView<?> parent) {
+                // Do nothing
             }
         });
-
-
     }
-    public void logOut(View view){
-
-        ParseUser.logOutInBackground(new LogOutCallback() {
-            @Override
-            public void done(ParseException e) {
-                if(e !=null){
-                    Toast.makeText(getApplicationContext(),e.getLocalizedMessage(),Toast.LENGTH_LONG).show();
-                }else{
-                    Intent intent=new Intent(getApplicationContext(), SignIn.class);
-                    startActivity(intent);
-
-
-                }
-            }
-        });
-
+    private void logOut() {
+        // Clear only the in-memory user reference
+        SignInActivity.mainUser = null;
+        
+        // Navigate to SignInActivity
+        Intent intent = new Intent(getActivity(), SignInActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(intent);
+        getActivity().finish();
     }
 
 
@@ -537,9 +398,9 @@ logOut.setOnClickListener(new View.OnClickListener() {
 
                 }
                 mainUser.setPhoto(selectedImage);
-                Bitmap smallerImage = makeSmallerImage(selectedImage, 300);
+                Bitmap smallerImage = makeSmallerImage(selectedImage, BankConfig.IMAGE_MAX_SIZE);
                 ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-                smallerImage.compress(Bitmap.CompressFormat.PNG, 50, byteArrayOutputStream);
+                smallerImage.compress(Bitmap.CompressFormat.PNG, BankConfig.IMAGE_QUALITY, byteArrayOutputStream);
 
                 byte[] bytes = byteArrayOutputStream.toByteArray();
 
@@ -554,7 +415,7 @@ logOut.setOnClickListener(new View.OnClickListener() {
                             if (objects.size() > 0) {
                                 for (ParseObject object : objects) {
                                     ParseObject userInfo = objects.get(0);
-                                        ParseFile file = new ParseFile("image.png", bytes);
+                                        ParseFile file = new ParseFile(BankConfig.IMAGE_FORMAT, bytes);
                                         userInfo.put("images", file);
                                         object.saveInBackground(new SaveCallback() {
                                             @Override
@@ -562,7 +423,7 @@ logOut.setOnClickListener(new View.OnClickListener() {
                                                 if (e != null) {
                                                     Toast.makeText(getContext(), e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
                                                 } else {
-                                                    Toast.makeText(getContext(), "Uploaded", Toast.LENGTH_SHORT).show();
+                                                    Toast.makeText(getContext(), BankConfig.SETTINGS_UPLOAD_SUCCESS, BankConfig.TOAST_SHORT).show();
 
                                                 }
 

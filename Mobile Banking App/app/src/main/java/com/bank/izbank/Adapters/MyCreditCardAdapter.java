@@ -17,10 +17,11 @@ import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bank.izbank.R;
-import com.bank.izbank.Sign.SignIn;
+import com.bank.izbank.Sign.SignInActivity;
 import com.bank.izbank.UserInfo.BankAccount;
 import com.bank.izbank.UserInfo.CreditCard;
 import com.bank.izbank.UserInfo.History;
+import com.bank.izbank.UserInfo.User;
 import com.parse.FindCallback;
 import com.parse.ParseException;
 import com.parse.ParseObject;
@@ -34,10 +35,10 @@ import java.util.Date;
 import java.util.List;
 import java.util.Stack;
 
-import static com.bank.izbank.Sign.SignIn.mainUser;
 import static com.parse.Parse.getApplicationContext;
 
 public class MyCreditCardAdapter extends RecyclerView.Adapter<MyCreditCardAdapter.ViewHolder> {
+    private User mainUser = SignInActivity.mainUser;
     ArrayList<BankAccount> MyBankAccounts;
     ArrayList<CreditCard> MyCreditCards;
     Activity context;
@@ -61,8 +62,6 @@ public class MyCreditCardAdapter extends RecyclerView.Adapter<MyCreditCardAdapte
     }
 
     @NonNull
-
-
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         text_view_total_money = context.findViewById(R.id.text_view_total_money);
@@ -105,26 +104,17 @@ public class MyCreditCardAdapter extends RecyclerView.Adapter<MyCreditCardAdapte
                             switch (i) {
                                 case 0:
                                     checkedItem[0] =i;
-
-
                                     break;
                                 case 1:
-
                                     checkedItem[0] =i;
-
                                     break;
                                 case 2:
-
                                     checkedItem[0] =i;
-
                                     break;
                                 case 3:
-
                                     checkedItem[0] =i;
-
                                     break;
                                 case 4:
-
                                     checkedItem[0] =i;
                                     break;
                             }
@@ -133,7 +123,6 @@ public class MyCreditCardAdapter extends RecyclerView.Adapter<MyCreditCardAdapte
                     ad.setNegativeButton("Pay", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialogInterface, int i) {
-
                             i= checkedItem[0];
                             MyCreditCards.get(position).setLimit(MyCreditCards.get(position).getLimit() + Integer.parseInt(editText.getText().toString()));
                             holder.textCreditCardLimit.setText(String.valueOf(CreditCard.getLimit()));
@@ -146,17 +135,12 @@ public class MyCreditCardAdapter extends RecyclerView.Adapter<MyCreditCardAdapte
                             History hs = new History(mainUser.getId(),"Credit Card Paid.",getDate() );
                             mainUser.getHistory().push(hs);
                             historyToDatabase(hs);
-
-
-
                         }
                     });
                     ad.create().show();
                 }
-
             }
         });
-
     }
 
     @Override
@@ -174,7 +158,7 @@ public class MyCreditCardAdapter extends RecyclerView.Adapter<MyCreditCardAdapte
     public void accountsToDatabase(BankAccount bankAc){
         ParseObject object=new ParseObject("BankAccount");
         object.put("accountNo",bankAc.getAccountno());
-        object.put("userId", SignIn.mainUser.getId());
+        object.put("userId", SignInActivity.mainUser.getId());
 
         object.put("cash",String.valueOf(bankAc.getCash()));
 
@@ -196,7 +180,7 @@ public class MyCreditCardAdapter extends RecyclerView.Adapter<MyCreditCardAdapte
     public void cardsToDatabase(CreditCard card){
         ParseObject object=new ParseObject("CreditCard");
         object.put("creditCardNo",card.getCreditCardNo());
-        object.put("userId", SignIn.mainUser.getId());
+        object.put("userId", SignInActivity.mainUser.getId());
 
         object.put("limit",String.valueOf(card.getLimit()));
 
@@ -230,19 +214,9 @@ public class MyCreditCardAdapter extends RecyclerView.Adapter<MyCreditCardAdapte
                             object.deleteInBackground();
                             Toast.makeText(getApplicationContext(),"sildi",Toast.LENGTH_LONG).show();
                             cardsToDatabase(card);
-
-
-
-
-
                         }
-
-
                     }
-
                 }
-
-
             }
         });
     }
@@ -262,19 +236,9 @@ public class MyCreditCardAdapter extends RecyclerView.Adapter<MyCreditCardAdapte
                             object.deleteInBackground();
                             Toast.makeText(getApplicationContext(),"sildi",Toast.LENGTH_LONG).show();
                             accountsToDatabase(bankac);
-
-
-
-
-
                         }
-
-
                     }
-
                 }
-
-
             }
         });
     }

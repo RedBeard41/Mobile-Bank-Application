@@ -1,12 +1,14 @@
 package com.bank.izbank.Bill;
 
-import java.io.Serializable;
-
-public class Bill implements Serializable {
+public class Bill {
 
     private String type;
     private int amount;
     private Date date;
+
+    // Default constructor for GSON
+    public Bill() {
+    }
 
     public Bill(String type, int amount, Date date) {
         this.type = type;
@@ -14,15 +16,10 @@ public class Bill implements Serializable {
         this.date = date;
     }
 
-    public Bill() {
-    }
-
     public Bill(String type, int amount) {
         this.type = type;
         this.amount = amount;
-        date.setYear("0");
-        date.setMonth("0");
-        date.setDay("0");
+        this.date = new Date();
     }
 
     public String getType() {

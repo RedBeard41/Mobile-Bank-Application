@@ -26,7 +26,7 @@ public class MyBankAccountAdapter extends RecyclerView.Adapter<MyBankAccountAdap
     Activity context;
 
     public MyBankAccountAdapter(ArrayList<BankAccount> myMovieData,Activity activity) {
-        this.MyBankAccounts = myMovieData;
+        this.MyBankAccounts = myMovieData != null ? myMovieData : new ArrayList<>();
         this.context = activity;
     }
 
@@ -57,7 +57,7 @@ public class MyBankAccountAdapter extends RecyclerView.Adapter<MyBankAccountAdap
 
     @Override
     public int getItemCount() {
-        return MyBankAccounts.size();
+        return MyBankAccounts != null ? MyBankAccounts.size() : 0;
     }
 
 

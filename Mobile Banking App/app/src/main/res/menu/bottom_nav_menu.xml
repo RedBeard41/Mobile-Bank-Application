@@ -11,10 +11,6 @@
         android:icon="@drawable/icon_pay" />
 
     <item
-        android:id="@+id/menu3"
-        android:icon="@drawable/icon_drawer_bitcoin" />
-
-    <item
         android:id="@+id/menu4"
         android:icon="@drawable/icon_bill" />
 

@@ -1,25 +1,23 @@
 package com.bank.izbank.Bill;
 
-import java.io.Serializable;
-
-public class GasBill extends Bill implements Serializable {
+public class GasBill extends Bill {
     private final String type = "Gas Bill";
     private int amount;
     private Date date;
+
+    public GasBill() {
+        date = new Date();
+        amount = 0;
+    }
 
     public GasBill(int amount, Date date) {
         this.amount = amount;
         this.date = date;
     }
 
-    public GasBill() {
-        date=new Date();
-        amount=0;
-    }
-
     public GasBill(int amount) {
         this.amount = amount;
-        date=new Date();
+        date = new Date();
     }
 
     @Override

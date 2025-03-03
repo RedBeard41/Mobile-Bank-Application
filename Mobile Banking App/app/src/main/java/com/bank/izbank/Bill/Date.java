@@ -7,6 +7,7 @@ public class Date implements Serializable {
     private String month;
     private String year;
 
+    // Default constructor for GSON
     public Date() {
     }
 

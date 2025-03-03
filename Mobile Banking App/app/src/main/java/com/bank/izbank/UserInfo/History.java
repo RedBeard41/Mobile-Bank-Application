@@ -2,6 +2,7 @@ package com.bank.izbank.UserInfo;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import com.bank.izbank.config.BankConfig;
 
 public class History {
     private String userId;
@@ -41,5 +42,10 @@ public class History {
 
     public void setProcess(String process) {
         Process = process;
+    }
+
+    private String formatDate(String date) {
+        SimpleDateFormat format = new SimpleDateFormat(BankConfig.DATE_FORMAT);
+        return format.format(date);
     }
 }

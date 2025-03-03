@@ -1,13 +1,15 @@
 package com.bank.izbank.Job;
 
+import com.google.gson.annotations.Expose;
+
 public class Job {
 
-    private String name;
-    private String maxCreditAmount;
-    private String maxCreditInstallment;
-    private String interestRate;
+    @Expose private String name;
+    @Expose private String maxCreditAmount;
+    @Expose private String maxCreditInstallment;
+    @Expose private String interestRate;
 
-    public Job(String name, String maxCreditAmount, String maxCreditInstallment,String interestRate) {
+    public Job(String name, String maxCreditAmount, String maxCreditInstallment, String interestRate) {
         this.name = name;
         this.maxCreditAmount = maxCreditAmount;
         this.maxCreditInstallment = maxCreditInstallment;

@@ -1,0 +1,60 @@
+java/com.bank.izbank/
+├── Adapters/
+│   ├── BillAdapter
+│   ├── CreditAdapter
+│   ├── HistoryAdapter
+│   ├── MyBankAccountAdapter
+│   ├── MyCreditCardAdapter
+│   └── UserAdapter
+├── Bill/
+│   ├── Bill
+│   ├── Date
+│   ├── ElectricBill
+│   ├── GasBill
+│   ├── InternetBill
+│   ├── PhoneBill
+│   └── WaterBill
+├── config/
+│   └── BankConfig
+├── Credit/
+│   ├── Credit
+│   └── CustomEventListener
+├── Job/
+│   ├── Contractor
+│   ├── Doctor
+│   ├── Driver
+│   ├── Engineer
+│   ├── Entrepreneur
+│   ├── Farmer
+│   ├── Job
+│   ├── Police
+│   ├── Soldier
+│   ├── Sportsman
+│   ├── Student
+│   ├── Teacher
+│   ├── Waiter
+│   └── Worker
+├── MainScreen/
+│   ├── AccountFragment
+│   ├── AdminPanelActivity
+│   ├── BillFragment
+│   ├── CreditFragment
+│   ├── MainScreenActivity
+│   └── SettingFragment
+├── persistence.JSON/
+│   └── JsonStorage
+├── Sign/
+│   ├── SignInActivity
+│   └── SignUpActivity
+├── splashScreen/
+│   ├── GifImageView
+│   └── splashScreen
+└── UserInfo/
+    ├── Address
+    ├── Admin
+    ├── BankAccount
+    ├── CreditCard
+    ├── History
+    ├── User
+    ├── UserContext
+    └── UserTypeState

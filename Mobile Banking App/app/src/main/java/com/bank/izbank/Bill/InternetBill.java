@@ -1,28 +1,24 @@
 package com.bank.izbank.Bill;
 
-import java.io.Serializable;
+public class InternetBill extends Bill {
 
-public class InternetBill extends Bill implements Serializable {
-
-    private final String type ="Internet Bill";
+    private final String type = "Internet Bill";
     private int amount;
     private Date date;
 
-    public InternetBill( int amount, Date date) {
+    public InternetBill() {
+        date = new Date();
+        amount = 0;
+    }
 
+    public InternetBill(int amount, Date date) {
         this.amount = amount;
         this.date = date;
     }
 
-    public InternetBill() {
-        date=new Date();
-        amount=0;
-
-    }
-
     public InternetBill(int amount) {
         this.amount = amount;
-        date=new Date();
+        date = new Date();
     }
 
     @Override

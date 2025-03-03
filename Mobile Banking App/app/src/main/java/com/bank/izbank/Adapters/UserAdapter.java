@@ -22,7 +22,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bank.izbank.R;
-import com.bank.izbank.Sign.SignIn;
+import com.bank.izbank.Sign.SignInActivity;
 import com.bank.izbank.UserInfo.BankAccount;
 import com.bank.izbank.UserInfo.User;
 import com.parse.DeleteCallback;
@@ -35,8 +35,6 @@ import com.parse.ParseUser;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import static com.bank.izbank.Sign.SignIn.mainUser;
 
 public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
 

@@ -12,6 +12,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Spinner;
@@ -45,200 +46,190 @@ import com.parse.ParseQuery;
 import com.parse.ParseUser;
 import com.parse.SaveCallback;
 import com.parse.SignUpCallback;
+import com.bank.izbank.persistence.JSON.JsonStorage;
+import com.bank.izbank.config.BankConfig;
+import com.bank.izbank.Sign.SignInActivity;
 
 import java.io.ByteArrayOutputStream;
-import java.util.List;
-
-import static com.bank.izbank.Sign.SignIn.mainUser;
+import java.util.UUID;
 
 public class SignUpActivity extends AppCompatActivity {
 
-    private EditText userNameText , userPassText ,userIdText,userPhoneText;
+    private EditText editTextName, editTextId, editTextPass, editTextPhone;
+    private Button buttonSignUp;
+    private Address address;
+    private Job job;
+    private User user;
+    private Spinner jobSpinner;
+    private String[] jobs;
+    private Job[] defaultJobs;
 
-    private Spinner spinner;
-    private ArrayAdapter<String> jobArrayAdapter;
-    private String [] jobs;
-    private Job [] defaultJobs;
-    public Job tempJob ;
-    public String job;
-    private ImageView imageView;
-    
-    private Address newAddress;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sign_up);
-        userNameText=findViewById(R.id.edittext_id_name_sign_up);
-        userPassText=findViewById(R.id.edittext_user_password_sign_up);
-        userIdText=findViewById(R.id.edittext_id_number_sign_up);
-        userPhoneText=findViewById(R.id.edittext_phone_sign_up);
-        spinner = findViewById(R.id.jobSpinner);
-        imageView=findViewById(R.id.fragment5_ImageView);
 
-        defineJobSpinner();
+        // Make sure storage is initialized
+        if (!User.isStorageInitialized()) {
+            User.initializeStorage(getApplicationContext());
+        }
 
-    }
+        // Initialize views
+        editTextName = findViewById(R.id.edittext_id_name_sign_up);
+        editTextId = findViewById(R.id.idNumberEditText);
+        editTextPass = findViewById(R.id.edittext_user_password_sign_up);
+        editTextPhone = findViewById(R.id.edittext_phone_sign_up);
+        buttonSignUp = findViewById(R.id.button_sign_up);
+        jobSpinner = findViewById(R.id.jobSpinner);
 
-    public void defineJobSpinner(){
+        // Initialize job arrays
+        jobs = new String[]{
+            "Doctor", "Engineer", "Teacher", "Police", "Soldier",
+            "Driver", "Worker", "Farmer", "Student", "Waiter",
+            "Contractor", "Entrepreneur", "Sportsman"
+        };
+        
+        defaultJobs = new Job[]{
+            new Doctor(), new Engineer(), new Teacher(), new Police(),
+            new Soldier(), new Driver(), new Worker(), new Farmer(),
+            new Student(), new Waiter(), new Contractor(),
+            new Entrepreneur(), new Sportsman()
+        };
 
-        defaultJobs = new Job[]{new Contractor(),new Doctor(),new Driver(),new Engineer(),new Entrepreneur(),
-        new Farmer(),new Police(),new Soldier(),new Sportsman(),new Student(),new Teacher(),new Waiter(),new Worker()};
+        // Set up job spinner
+        ArrayAdapter<String> jobAdapter = new ArrayAdapter<>(
+            this,
+            android.R.layout.simple_spinner_item,
+            jobs
+        );
+        jobAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        jobSpinner.setAdapter(jobAdapter);
+        
+        // Set default selection to Contractor (index 10)
+        jobSpinner.setSelection(10);
+        job = defaultJobs[10];  // Default to Contractor
 
-        jobs = new String[] {"Contractor","Doctor","Driver","Engineer","Entrepreneur","Farmer","Police","Soldier",
-                "Sportsman","Student","Teacher","Waiter","Worker"};
-
-        jobArrayAdapter = new ArrayAdapter(this,R.layout.support_simple_spinner_dropdown_item,jobs);
-
-        spinner.setAdapter(jobArrayAdapter);
-
-        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+        jobSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
-            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-
-
-                job = adapterView.getSelectedItem().toString();
-
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                job = defaultJobs[position];
             }
 
             @Override
-            public void onNothingSelected(AdapterView<?> adapterView) {
-
+            public void onNothingSelected(AdapterView<?> parent) {
+                job = new Contractor(); // Default to Contractor if nothing selected
             }
         });
 
-
+        buttonSignUp.setOnClickListener(v -> signUp());
     }
 
-    public void signUp(View view) {
-        if (!isValidSignup()) {
+    private void signUp() {
+        String name = editTextName.getText().toString().trim();
+        String id = editTextId.getText().toString().trim();
+        String pass = editTextPass.getText().toString().trim();
+        String phone = editTextPhone.getText().toString().trim();
+
+        if (name.isEmpty() || id.isEmpty() || pass.isEmpty() || phone.isEmpty()) {
+            Toast.makeText(this, "Please fill all fields", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        // Create user with basic required fields
-        mainUser = new User(
-            userNameText.getText().toString(),
-            userIdText.getText().toString(),
-            userPassText.getText().toString(),
-            userPhoneText.getText().toString(),
-            null  // Address is optional
-        );
+        // Use existing address if it was created, otherwise use default address
+        Address userAddress = address;  // use class field
+        if (userAddress == null) {
+            userAddress = new Address(
+                "Not specified", // street
+                "Not specified", // neighborhood
+                0,              // apartmentNumber
+                0,              // floor
+                0,              // homeNumber
+                "Not specified", // province
+                "Not specified", // city
+                "Not specified"  // country
+            );
+        }
 
-        // Create UserInfo object
-        ParseObject userInfo = new ParseObject("UserInfo");
-        populateUserInfo(userInfo);
-        
-        // Save locally
+        // Create and save new user with selected job
+        user = new User(name, id, pass, phone, userAddress, job);
         try {
-            userInfo.pin();
-            Log.d("SignUpActivity", "User data saved locally");
-            Toast.makeText(getApplicationContext(), 
-                "User Created Successfully", 
-                Toast.LENGTH_LONG).show();
-            
-            // Go to sign in
-            Intent intent = new Intent(getApplicationContext(), SignIn.class);
-            startActivity(intent);
+            user.save();
+            Toast.makeText(this, "Sign up successful", Toast.LENGTH_SHORT).show();
             finish();
-        } catch (ParseException e) {
-            Log.e("SignUpActivity", "Error saving locally: " + e.getMessage());
-            Toast.makeText(getApplicationContext(), 
-                "Error creating user: " + e.getMessage(), 
-                Toast.LENGTH_LONG).show();
+        } catch (Exception e) {
+            Toast.makeText(this, "Error creating user: " + e.getMessage(), Toast.LENGTH_SHORT).show();
         }
     }
 
-    private void populateUserInfo(ParseObject userInfo) {
-        // Set only required fields
-        userInfo.put("username", mainUser.getId());
-        userInfo.put("password", mainUser.getPass());
-        userInfo.put("userRealName", mainUser.getName());
-        userInfo.put("phone", mainUser.getPhoneNumber());
-        
-        // Only add address if it exists
-        if (newAddress != null) {
-            userInfo.put("address", mainUser.addressWrite());
-        }
-
-        // Set job info if selected
-        if (job != null) {
-            for (Job x : defaultJobs) {
-                if (x.getName().equals(job)) {
-                    tempJob = x;
-                    break;
-                }
-            }
-            if (tempJob != null) {
-                mainUser.setJob(tempJob);
-                userInfo.put("job", tempJob.getName());
-                userInfo.put("maxCreditAmount", tempJob.getMaxCreditAmount());
-                userInfo.put("maxCreditInstallment", tempJob.getMaxCreditInstallment());
-                userInfo.put("interestRate", tempJob.getInterestRate());
-            }
-        }
-    }
-
-    private boolean isValidSignup() {
-        // Check only required fields
-        if (userNameText.getText().toString().isEmpty() ||
-            userIdText.getText().toString().isEmpty() ||
-            userPassText.getText().toString().isEmpty() ||
-            userPhoneText.getText().toString().isEmpty()) {
-            Toast.makeText(getApplicationContext(), 
-                "Please fill all required fields", 
-                Toast.LENGTH_LONG).show();
-            return false;
-        }
-
-        // Check password length
-        if (userPassText.getText().toString().length() < 6) {
-            Toast.makeText(getApplicationContext(), 
-                "Password must be at least 6 characters", 
-                Toast.LENGTH_LONG).show();
-            return false;
-        }
-
-        return true;
-    }
-
-    public void createAddress(View v){
-
+    public void createAddress(View v) {
         AlertDialog.Builder ad = new AlertDialog.Builder(this);
-
         ad.setTitle("Address");
         ad.setIcon(R.drawable.ic_address);
         LayoutInflater inflater = getLayoutInflater();
-        View dialogView= inflater.inflate(R.layout.settings_address_popup, null);
+        View dialogView = inflater.inflate(R.layout.settings_address_popup, null);
         ad.setView(dialogView);
         ad.setPositiveButton("CONTINUE", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                TextView street=dialogView.findViewById(R.id.setting_address_street);
-                TextView blockNo=dialogView.findViewById(R.id.setting_address_block);
-                TextView floor=dialogView.findViewById(R.id.setting_address_floor);
-                TextView houseNo=dialogView.findViewById(R.id.setting_address_house);
-                TextView country=dialogView.findViewById(R.id.setting_address_country);
-                TextView neighborhood=dialogView.findViewById(R.id.setting_address_neigh);
-                TextView town=dialogView.findViewById(R.id.setting_address_town);
-                TextView state=dialogView.findViewById(R.id.setting_address_state);
-                if(street.getText().toString() !=null &&neighborhood.getText().toString()!=null && blockNo.getText().toString()!=null&&floor.getText().toString()!=null &&houseNo.getText().toString()!=null&& town.getText().toString()!=null &&state.getText().toString()!=null&& country.getText().toString()!=null){
-                    newAddress= new Address(street.getText().toString(),neighborhood.getText().toString(),Integer.parseInt(blockNo.getText().toString()),Integer.parseInt(floor.getText().toString()),Integer.parseInt(houseNo.getText().toString()),town.getText().toString(),state.getText().toString(),country.getText().toString());
+                EditText street = dialogView.findViewById(R.id.setting_address_street);
+                EditText blockNo = dialogView.findViewById(R.id.setting_address_block);
+                EditText floor = dialogView.findViewById(R.id.setting_address_floor);
+                EditText houseNo = dialogView.findViewById(R.id.setting_address_house);
+                EditText country = dialogView.findViewById(R.id.setting_address_country);
+                EditText neighborhood = dialogView.findViewById(R.id.setting_address_neigh);
+                EditText town = dialogView.findViewById(R.id.setting_address_town);
+                EditText state = dialogView.findViewById(R.id.setting_address_state);
 
+                String streetText = street.getText().toString().trim();
+                String neighborhoodText = neighborhood.getText().toString().trim();
+                String blockNoText = blockNo.getText().toString().trim();
+                String floorText = floor.getText().toString().trim();
+                String houseNoText = houseNo.getText().toString().trim();
+                String townText = town.getText().toString().trim();
+                String stateText = state.getText().toString().trim();
+                String countryText = country.getText().toString().trim();
 
-                }else{
-                    Toast.makeText(getApplicationContext(),"Please Fill the all field",Toast.LENGTH_SHORT).show();
+                try {
+                    // Validate string fields
+                    if (streetText.isEmpty() || neighborhoodText.isEmpty() || 
+                        townText.isEmpty() || stateText.isEmpty() || 
+                        countryText.isEmpty()) {
+                        throw new IllegalArgumentException("Please fill all text fields");
+                    }
+
+                    // Parse and validate numeric fields
+                    int blockNumber = Integer.parseInt(blockNoText);
+                    int floorNumber = Integer.parseInt(floorText);
+                    int houseNumber = Integer.parseInt(houseNoText);
+
+                    if (blockNumber < 0 || floorNumber < 0 || houseNumber < 0) {
+                        throw new IllegalArgumentException("Numeric values cannot be negative");
+                    }
+                    
+                    address = new Address(
+                        streetText,
+                        neighborhoodText,
+                        blockNumber,
+                        floorNumber,
+                        houseNumber,
+                        townText,
+                        stateText,
+                        countryText
+                    );
+                    Toast.makeText(getApplicationContext(), "Address saved successfully", Toast.LENGTH_SHORT).show();
+                } catch (NumberFormatException e) {
+                    Toast.makeText(getApplicationContext(), "Please enter valid numbers for block, floor, and house number", Toast.LENGTH_SHORT).show();
+                } catch (IllegalArgumentException e) {
+                    Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
                 }
             }
         });
         ad.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                Toast.makeText(getApplicationContext(),"Canceled",Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(), "Canceled", Toast.LENGTH_SHORT).show();
             }
         });
         ad.create().show();
-
-
     }
-
-
 }

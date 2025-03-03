@@ -10,6 +10,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.ListView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -30,7 +31,7 @@ import com.bank.izbank.Bill.InternetBill;
 import com.bank.izbank.Bill.PhoneBill;
 import com.bank.izbank.Bill.WaterBill;
 import com.bank.izbank.R;
-import com.bank.izbank.Sign.SignIn;
+import com.bank.izbank.Sign.SignInActivity;
 import com.bank.izbank.UserInfo.BankAccount;
 import com.bank.izbank.UserInfo.History;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -39,6 +40,9 @@ import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.parse.SaveCallback;
+import com.bank.izbank.persistence.JSON.JsonStorage;
+import com.bank.izbank.config.BankConfig;
+import com.bank.izbank.UserInfo.User;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -46,7 +50,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
-import static com.bank.izbank.Sign.SignIn.mainUser;
 import static com.parse.Parse.getApplicationContext;
 
 public class BillFragment extends Fragment{
@@ -57,48 +60,40 @@ public class BillFragment extends Fragment{
     private BillAdapter billAdapter;
     private FloatingActionButton floatingActionButtonBill;
     private Bill bill;
-
-
-
-
-    @Nullable
-    @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_4,container,false);
-
-
-    }
-
-
+    private User mainUser;
 
     @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-    }
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment_4, container, false);
+        
+        // Make sure storage is initialized
+        if (!User.isStorageInitialized()) {
+            User.initializeStorage(getContext());
+        }
+        
+        mainUser = SignInActivity.mainUser;
+        
+        recyclerView = view.findViewById(R.id.recyclerView_bill);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        
+        floatingActionButtonBill = view.findViewById(R.id.floatingActionButton_bill);
 
-    @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-
-        floatingActionButtonBill = getView().findViewById(R.id.floatingActionButton_bill);
-
-        toolbar = getView().findViewById(R.id.toolbar_bill);
-        toolbar.setTitle("Bill Screen");
+        toolbar = view.findViewById(R.id.toolbar_bill);
+        toolbar.setTitle(BankConfig.BILL_TITLE);
         toolbar.setLogo(R.drawable.icon_receipt);
 
         ((AppCompatActivity)getActivity()).setSupportActionBar(toolbar);
 
         setHasOptionsMenu(true);
-
-        recyclerView = getView().findViewById(R.id.recyclerView_bill);
-
-        recyclerView.setHasFixedSize(true);
-        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-
-        list = SignIn.mainUser.getUserbills();
-
-        billAdapter = new BillAdapter(getContext(),list);
-
+        
+        // Convert List to ArrayList if needed
+        if (mainUser.getUserbills() instanceof ArrayList) {
+            list = (ArrayList<Bill>) mainUser.getUserbills();
+        } else {
+            list = new ArrayList<>(mainUser.getUserbills());
+        }
+        
+        billAdapter = new BillAdapter(getContext(), list);
         recyclerView.setAdapter(billAdapter);
 
         floatingActionButtonBill.setOnClickListener(new View.OnClickListener() {
@@ -106,12 +101,12 @@ public class BillFragment extends Fragment{
             public void onClick(View view) {
 
                 final EditText editText = new EditText(getContext());
-                editText.setHint("type amount");
+                editText.setHint(BankConfig.BILL_AMOUNT_HINT);
                 editText.setInputType(InputType.TYPE_CLASS_NUMBER);
 
                 AlertDialog.Builder ad = new AlertDialog.Builder(getContext());
 
-                ad.setTitle("Choose bill which you want pay");
+                ad.setTitle(BankConfig.BILL_CHOOSE_TITLE);
                 ad.setIcon(R.drawable.icon_bill);
                 ad.setView(editText);
 
@@ -209,6 +204,17 @@ public class BillFragment extends Fragment{
             }
         });
 
+        return view;
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
     }
 
     public void payBill(Bill bill){
@@ -216,110 +222,46 @@ public class BillFragment extends Fragment{
         int max=Integer.MIN_VALUE;
         int index=-1;
 
-        for(int i =0;i<SignIn.mainUser.getBankAccounts().size();i++){
+        for(int i =0;i<SignInActivity.mainUser.getBankAccounts().size();i++){
 
-            if(SignIn.mainUser.getBankAccounts().get(i).getCash()>max){
-                max=SignIn.mainUser.getBankAccounts().get(i).getCash();
+            if(SignInActivity.mainUser.getBankAccounts().get(i).getCash()>max){
+                max=SignInActivity.mainUser.getBankAccounts().get(i).getCash();
                 index=i;
             }
 
         }
 
-        if(SignIn.mainUser.getBankAccounts().size()>0 &&
-                bill.getAmount()<=SignIn.mainUser.getBankAccounts().get(index).getCash()){
+        if(SignInActivity.mainUser.getBankAccounts().size()>0 &&
+                bill.getAmount()<=SignInActivity.mainUser.getBankAccounts().get(index).getCash()){
 
-            SignIn.mainUser.getBankAccounts().get(index).
-                    setCash(SignIn.mainUser.getBankAccounts().get(index).getCash()-bill.getAmount());
+            BankAccount account = SignInActivity.mainUser.getBankAccounts().get(index);
+            account.setCash(account.getCash()-bill.getAmount());
 
-            updateBankAccount(SignIn.mainUser.getBankAccounts().get(index));
+            mainUser.save();
 
-            Toast.makeText(getApplicationContext(),"Bill Paid",Toast.LENGTH_LONG).show();
+            Toast.makeText(getApplicationContext(), BankConfig.BILL_PAID_MSG, BankConfig.TOAST_LONG).show();
 
-            billToDatabase(bill);
             list.add(bill);
+            mainUser.save();
             billAdapter = new BillAdapter(getContext(),list);
 
 
             recyclerView.setAdapter(billAdapter);
-            History hs = new History(mainUser.getId(),"Bill Paid.(" + bill.getType()+")",getDateRealTime() );
+            History hs = new History(mainUser.getId(), 
+                String.format(BankConfig.BILL_PAID_FORMAT, bill.getType(), bill.getAmount(), BankConfig.CURRENCY), 
+                getDateRealTime());
             mainUser.getHistory().push(hs);
-            historyToDatabase(hs);
+            mainUser.save();
 
         }
         else {
 
-            Toast.makeText(getApplicationContext(),"You Don't Have Enough Money",Toast.LENGTH_LONG).show();
+            Toast.makeText(getApplicationContext(), BankConfig.INSUFFICIENT_FUNDS_MSG, BankConfig.TOAST_LONG).show();
 
 
         }
 
 
-    }
-    public void updateBankAccount(BankAccount bankac){
-        ParseQuery<ParseObject> queryBankAccount=ParseQuery.getQuery("BankAccount");
-        queryBankAccount.whereEqualTo("accountNo", bankac.getAccountno());
-        queryBankAccount.findInBackground(new FindCallback<ParseObject>() {
-            @Override
-            public void done(List<ParseObject> objects, ParseException e) {
-                if(e!=null){
-                    e.printStackTrace();
-                }else{
-
-                    if(objects.size()>0){
-                        for(ParseObject object:objects){
-                            object.deleteInBackground();
-
-                            accountsToDatabase(bankac);
-                        }
-                    }
-                }
-            }
-        });
-    }
-
-    public void accountsToDatabase(BankAccount bankAc){
-        ParseObject object=new ParseObject("BankAccount");
-        object.put("accountNo",bankAc.getAccountno());
-        object.put("userId", SignIn.mainUser.getId());
-
-        object.put("cash",String.valueOf(bankAc.getCash()));
-
-
-        object.saveInBackground(new SaveCallback() {
-            @Override
-            public void done(ParseException e) {
-                if(e != null){
-                    Toast.makeText(getApplicationContext(), e.getLocalizedMessage(),Toast.LENGTH_LONG).show();
-                }
-                else{
-
-
-                }
-            }
-        });
-    }
-
-
-    public void billToDatabase(Bill bill){
-        ParseObject object=new ParseObject("Bill");
-        object.put("type",bill.getType());
-        object.put("username", SignIn.mainUser.getId());
-        object.put("amount",String.valueOf(bill.getAmount()));
-        object.put("date",bill.getDate().getDay()+"/"+bill.getDate().getMonth()+
-                "/"+bill.getDate().getYear());
-
-        object.saveInBackground(new SaveCallback() {
-            @Override
-            public void done(ParseException e) {
-                if(e != null){
-
-                }
-                else{
-
-
-                }
-            }
-        });
     }
 
     public void setDate(Bill newBill){
@@ -341,34 +283,19 @@ public class BillFragment extends Fragment{
 
 
 
-    public void historyToDatabase(History history){
-        ParseObject object=new ParseObject("History");
-        object.put("process",history.getProcess());
-        object.put("userId", mainUser.getId());
-
-        object.put("date",history.getDateDate());
-
-
-        object.saveInBackground(new SaveCallback() {
-            @Override
-            public void done(ParseException e) {
-                if(e != null){
-
-                }
-                else{
-
-                }
-            }
-        });
-    }
-
-
     public java.util.Date getDateRealTime(){
         SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy");
         Date currentTime = Calendar.getInstance().getTime();
         return currentTime;
     }
 
-
+    private void updateBillsList() {
+        if (mainUser.getUserbills() instanceof ArrayList) {
+            list = (ArrayList<Bill>) mainUser.getUserbills();
+        } else {
+            list = new ArrayList<>(mainUser.getUserbills());
+        }
+        billAdapter.notifyDataSetChanged();
+    }
 
 }

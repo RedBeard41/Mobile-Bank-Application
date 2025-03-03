@@ -52,26 +52,27 @@ def retrofitVersion = '2.9.0'
 def rxJavaVersion = '3.1.8'
 def rxAndroidVersion = '3.0.2'
 dependencies {
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation 'androidx.appcompat:appcompat:1.7.0'
-    implementation 'com.google.android.material:material:1.12.0'
-    implementation 'androidx.constraintlayout:constraintlayout:2.2.0'
-    implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.8.7'
-    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.7'
+    implementation fileTree(dir: "libs", include: ["*.jar"])
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
-    implementation 'androidx.coordinatorlayout:coordinatorlayout:1.2.0'
+    implementation 'com.google.android.material:material:1.9.0'
     implementation 'com.parse:parse-android:1.17.3'
+    implementation 'androidx.recyclerview:recyclerview:1.2.1'
     testImplementation 'junit:junit:4.13.2'
-    androidTestImplementation 'androidx.test.ext:junit:1.2.1'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.6.1'
-    implementation 'com.google.android.material:material:1.12.0'
-    //  compile 'com.parse:parse-android:1.17.3'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
+
+    // Remove these crypto-related dependencies:
+    // implementation 'com.squareup.retrofit2:retrofit:2.9.0'
+    // implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
+    // implementation 'io.reactivex.rxjava3:rxandroid:3.0.0'
+    // implementation 'io.reactivex.rxjava3:rxjava:3.0.0'
+    // implementation 'com.squareup.retrofit2:adapter-rxjava3:2.9.0'
 
     implementation 'com.felipecsl:gifimageview:2.1.0'
     implementation 'commons-io:commons-io:2.13.0'
     implementation 'com.google.android.material:material:1.12.0'
-    implementation "com.squareup.retrofit2:retrofit:$retrofitVersion"
-    implementation "com.squareup.retrofit2:converter-gson:$retrofitVersion"
     implementation "com.squareup.retrofit2:adapter-rxjava3:$retrofitVersion"
 
     // RxJava3 Dependencies
@@ -80,15 +81,15 @@ dependencies {
 
     implementation 'com.squareup.picasso:picasso:2.71828'
 
-
-
-    implementation 'androidx.recyclerview:recyclerview:1.3.2'
-
     implementation 'com.github.ar-android:AndroidSvgLoader:1.0.2'
 
-    // Add these new dependencies
-    implementation 'com.squareup.retrofit2:adapter-rxjava3:2.9.0'
-    implementation 'com.github.akarnokd:rxjava3-retrofit-adapter:3.0.0'
-    implementation 'io.reactivex.rxjava3:rxjava:3.0.0'
-    implementation 'io.reactivex.rxjava3:rxandroid:3.0.0'
+    implementation 'com.google.code.gson:gson:2.8.9'
+
+    // Remove these Parse-related dependencies if they exist:
+    // implementation 'com.parse:parse-android:x.x.x'
+    // implementation 'com.parse:parse-android-bolts:x.x.x'
+    
+    // Keep other dependencies:
+    implementation 'com.github.bumptech.glide:glide:4.15.1'
+    implementation 'pl.droidsonroids.gif:android-gif-drawable:1.2.25'
 }

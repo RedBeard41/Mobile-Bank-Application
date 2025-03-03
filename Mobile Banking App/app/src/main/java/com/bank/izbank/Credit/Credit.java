@@ -7,7 +7,11 @@ public class Credit {
     private int interestRate;
     private int payAmount;
 
-    public Credit(int amount, int installment, int interestRate,int payAmount) {
+    // Default constructor for GSON
+    public Credit() {
+    }
+
+    public Credit(int amount, int installment, int interestRate, int payAmount) {
         this.amount = amount;
         this.installment = installment;
         this.interestRate = interestRate;

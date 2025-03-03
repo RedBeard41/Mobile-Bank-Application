@@ -1,25 +1,23 @@
 package com.bank.izbank.Bill;
 
-import java.io.Serializable;
-
-public class ElectricBill extends Bill implements Serializable {
+public class ElectricBill extends Bill {
     private final String type = "Electric Bill";
     private int amount;
     private Date date;
+
+    public ElectricBill() {
+        date = new Date();
+        amount = 0;
+    }
 
     public ElectricBill(int amount, Date date) {
         this.amount = amount;
         this.date = date;
     }
 
-    public ElectricBill() {
-        date=new Date();
-        amount=0;
-    }
-
     public ElectricBill(int amount) {
         this.amount = amount;
-        date=new Date();
+        date = new Date();
     }
 
     @Override

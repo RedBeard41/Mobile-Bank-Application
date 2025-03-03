@@ -15,7 +15,7 @@ import com.bank.izbank.Bill.Bill;
 import com.bank.izbank.MainScreen.AdminPanelActivity;
 import com.bank.izbank.MainScreen.MainScreenActivity;
 import com.bank.izbank.R;
-import com.bank.izbank.Sign.SignIn;
+import com.bank.izbank.Sign.SignInActivity;
 import com.bank.izbank.UserInfo.Admin;
 import com.bank.izbank.UserInfo.BankAccount;
 import com.bank.izbank.UserInfo.User;
@@ -34,7 +34,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.bank.izbank.Sign.SignIn.mainUser;
+import static com.bank.izbank.Sign.SignInActivity.mainUser;
 
 public class splashScreen extends AppCompatActivity {
 
@@ -54,7 +54,6 @@ public class splashScreen extends AppCompatActivity {
         user.setName(prefs.getString("userName", ""));
         user.setPass(prefs.getString("userPass", ""));
         user.setPhoneNumber(prefs.getString("userPhone", ""));
-        // Load other user fields as needed
         return user;
     }
 
@@ -66,31 +65,28 @@ public class splashScreen extends AppCompatActivity {
         gifImageView = findViewById(R.id.GifImageView);
         progressBar = findViewById(R.id.progress_barr);
         progressBar.setVisibility(View.VISIBLE);
-        userContext=new UserContext();
-        normalUser=new User();
-        adminUser=new Admin();
-        //Gif create
+        userContext = new UserContext();
+        normalUser = new User();
+        adminUser = new Admin();
+
         try {
             InputStream inputStream = getAssets().open("deneme2.gif");
             byte[] bytes = IOUtils.toByteArray(inputStream);
             gifImageView.setBytes(bytes);
             gifImageView.startAnimation();
-        }
-        catch (IOException ex){
-
+        } catch (IOException ex) {
+            Log.e("splashScreen", "Error loading gif: " + ex.getMessage());
         }
 
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
-                // Try to load user data if mainUser is null
                 if (mainUser == null) {
                     mainUser = loadUserFromPrefs();
                 }
 
                 if (mainUser == null) {
-                    Log.e("splashScreen", "No user data found, redirecting to SignIn");
-                    Intent intent = new Intent(splashScreen.this, SignIn.class);
+                    Intent intent = new Intent(splashScreen.this, SignInActivity.class);
                     startActivity(intent);
                     finish();
                     return;
@@ -110,11 +106,11 @@ public class splashScreen extends AppCompatActivity {
                     finish();
                 } catch (Exception e) {
                     Log.e("splashScreen", "Error in navigation: " + e.getMessage());
-                    Intent intent = new Intent(splashScreen.this, SignIn.class);
+                    Intent intent = new Intent(splashScreen.this, SignInActivity.class);
                     startActivity(intent);
                     finish();
                 }
             }
-        }, 5000);
+        }, 1000);
     }
 }

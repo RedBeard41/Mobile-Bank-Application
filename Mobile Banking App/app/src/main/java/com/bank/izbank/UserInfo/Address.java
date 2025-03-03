@@ -1,14 +1,16 @@
 package com.bank.izbank.UserInfo;
 
+import com.google.gson.annotations.Expose;
+
 public class Address {
-    private String street;
-    private String neighborhood;
-    private int apartmentNumber;
-    private int floor;
-    private int homeNumber;
-    private String province;
-    private String city;
-    private String country;
+    @Expose private String street;
+    @Expose private String neighborhood;
+    @Expose private int apartmentNumber;
+    @Expose private int floor;
+    @Expose private int homeNumber;
+    @Expose private String province;
+    @Expose private String city;
+    @Expose private String country;
 
     public Address(String street, String neighborhood, int apartmentNumber, int floor, int homeNumber, String province, String city, String country) {
         this.street = street;

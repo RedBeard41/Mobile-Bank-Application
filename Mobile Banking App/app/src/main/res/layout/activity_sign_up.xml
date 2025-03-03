@@ -14,7 +14,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        android:background="@drawable/icon_bank"></ImageView>
+        android:background="@drawable/icon_bank" />
 
     <TextView
         android:id="@+id/app_name_sign_up"
@@ -27,7 +27,8 @@
         android:textSize="40dp"
         android:textColor="@color/black"
         android:textStyle="bold"
-        android:text="SIGN UP"></TextView>
+        android:text="SIGN UP" />
+
     <LinearLayout
         android:id="@+id/layout_user_name_sign_up"
         android:paddingLeft="50dp"
@@ -38,21 +39,21 @@
         android:orientation="horizontal"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/app_name_sign_up"
-        >
+        app:layout_constraintTop_toBottomOf="@id/app_name_sign_up">
 
         <ImageView
             android:layout_width="45dp"
             android:layout_height="45dp"
-            android:src="@drawable/icon_user"></ImageView>
+            android:src="@drawable/icon_user" />
 
         <EditText
             android:id="@+id/edittext_id_name_sign_up"
             android:gravity="center"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Name"></EditText>
+            android:hint="Name" />
     </LinearLayout>
+
     <LinearLayout
         android:id="@+id/layout_user_id_sign_up"
         android:paddingLeft="50dp"
@@ -63,21 +64,21 @@
         android:orientation="horizontal"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/layout_user_name_sign_up"
-        >
+        app:layout_constraintTop_toBottomOf="@id/layout_user_name_sign_up">
 
         <ImageView
             android:layout_width="45dp"
             android:layout_height="45dp"
-            android:src="@drawable/icon_user"></ImageView>
+            android:src="@drawable/icon_user" />
 
         <EditText
-            android:id="@+id/edittext_id_number_sign_up"
-            android:gravity="center"
+            android:id="@+id/idNumberEditText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:inputType="numberDecimal"
-            android:hint="ID NUMBER"></EditText>
+            android:ems="10"
+            android:hint="ID Number"
+            android:inputType="number"
+            android:gravity="center" />
     </LinearLayout>
 
     <LinearLayout
@@ -90,15 +91,12 @@
         android:orientation="horizontal"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/layout_user_id_sign_up"
-        >
+        app:layout_constraintTop_toBottomOf="@id/layout_user_id_sign_up">
 
         <ImageView
             android:layout_width="45dp"
             android:layout_height="45dp"
-            android:src="@drawable/icon_lock"></ImageView>
-
-
+            android:src="@drawable/icon_lock" />
 
         <EditText
             android:id="@+id/edittext_user_password_sign_up"
@@ -106,10 +104,8 @@
             android:layout_height="wrap_content"
             android:inputType="textPassword"
             android:gravity="center"
-            android:hint="PASSWORD"></EditText>
+            android:hint="PASSWORD" />
     </LinearLayout>
-
-
 
     <LinearLayout
         android:id="@+id/layout_phone_sign_up"
@@ -121,15 +117,12 @@
         android:orientation="horizontal"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/layout_user_password"
-        >
+        app:layout_constraintTop_toBottomOf="@id/layout_user_password">
 
         <ImageView
             android:layout_width="45dp"
             android:layout_height="45dp"
-            android:src="@drawable/icon_phone"></ImageView>
-
-
+            android:src="@drawable/icon_phone" />
 
         <EditText
             android:id="@+id/edittext_phone_sign_up"
@@ -137,12 +130,8 @@
             android:layout_height="wrap_content"
             android:inputType="numberDecimal"
             android:gravity="center"
-
-            android:hint="PHONE"></EditText>
+            android:hint="PHONE" />
     </LinearLayout>
-
-
-
 
     <LinearLayout
         android:id="@+id/layout_address_sign_up"
@@ -154,13 +143,12 @@
         android:orientation="horizontal"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/layout_phone_sign_up"
-        >
+        app:layout_constraintTop_toBottomOf="@id/layout_phone_sign_up">
 
         <ImageView
             android:layout_width="45dp"
             android:layout_height="45dp"
-            android:src="@drawable/icon_address"></ImageView>
+            android:src="@drawable/icon_address" />
 
         <TextView
             android:id="@+id/signup_address"
@@ -171,12 +159,7 @@
             android:paddingTop="15dp"
             android:text="ADDRESS"
             android:textAlignment="center" />
-
-
     </LinearLayout>
-
-
-
 
     <LinearLayout
         android:id="@+id/layout_profession_sign_up"
@@ -188,23 +171,18 @@
         android:orientation="horizontal"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/layout_address_sign_up"
-        >
+        app:layout_constraintTop_toBottomOf="@id/layout_address_sign_up">
 
         <ImageView
             android:layout_width="45dp"
             android:layout_height="45dp"
-            android:src="@drawable/icon_profession"></ImageView>
+            android:src="@drawable/icon_profession" />
 
         <Spinner
             android:id="@+id/jobSpinner"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-             />
-
-
+            android:layout_height="match_parent" />
     </LinearLayout>
-
 
     <Button
         android:id="@+id/button_sign_up"
@@ -216,7 +194,6 @@
         android:text="SIGN UP"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/layout_profession_sign_up"></Button>
-
+        app:layout_constraintTop_toBottomOf="@id/layout_profession_sign_up" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
